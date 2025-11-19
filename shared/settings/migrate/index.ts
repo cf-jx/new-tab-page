@@ -1,0 +1,7 @@
+export { migrateFromVer1 } from './fromVer1'
+export { migrateFromVer2To3 } from './fromVer2'
+export { migrateFromVer3To4 } from './fromVer3'
+export { migrateFromVer4To5 } from './fromVer4'
+export { migrateFromVer5To6 } from './fromVer5'
+export { migrateFromVer6To7 } from './fromVer6'
+export { migrateFromVer7To8 } from './fromVer7'

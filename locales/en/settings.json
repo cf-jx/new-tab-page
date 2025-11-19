@@ -1,0 +1,178 @@
+{
+  "background": {
+    "blur": "Blur intensity",
+    "enableVignetting": "Enable vignetting",
+    "maskColor": "Mask color",
+    "maskOpacity": "Mask opacity",
+    "onlineTips": {
+      "a": "Submit after pressing the Enter key or when the input field loses focus.",
+      "b": "The wallpaper caching strategy depends on the browser, and wallpapers may not be accessible offline.",
+      "c": "There will be a blank screen before the wallpaper finishes loading, and the duration depends on your internet speed.",
+      "d": "Please ensure the wallpaper API you are using allows cross-origin requests; otherwise, it will fail to load."
+    },
+    "pauseWhenBlur": "Pause video background when the tab loses focus",
+    "tip": "If no background is set for dark mode, the light mode background or video will be used.",
+    "title": "Background",
+    "type": {
+      "bing": "Bing wallpaper",
+      "local": "Local image / video",
+      "none": "None",
+      "online": "Online image",
+      "title": "Background type"
+    },
+    "videoBlurTip": "Turn on to reduce performance usage when multiple new tabs or windows are open on the screen simultaneously.",
+    "videoWarning": "Using a video as the background will heavily consume GPU resources. To avoid maxing out the GPU, it’s recommended not to open multiple new tabs at the same time. It’s also recommended to disable the blinking time separator, search bar blur, and background zoom/blur on search bar click to reduce performance overhead.",
+    "warning": {
+      "fileIsNotImage": "The selected file is not an image!",
+      "granted": "Permission granted.",
+      "notGranted": "Permission not granted, cannot access this host.",
+      "securityPolicy": "Due to Google’s security policy, the extension needs permission to access {{host}} to get the background. Do you allow this extension to request access to this host?",
+      "title": "Warning",
+      "tooLarge": {
+        "message": "The file is too large ({{size}}) and may affect performance or occupy significant storage. Do you want to continue?",
+        "title": "Large File Warning"
+      },
+      "unknownSource": "Using images from unknown sources as backgrounds may expose your device to attacks. Do you want to continue?"
+    }
+  },
+  "clock": {
+    "blinkingColon": "Blinking colon",
+    "blinkingTip": "Turning this off can reduce sustained GPU usage.",
+    "enableShadow": "Show shadow",
+    "invertColorDark": "[Clock] Use dark text in dark mode",
+    "invertColorLight": "[Clock] Use dark text in light mode",
+    "showAMPM": "Show AM/PM",
+    "showDate": "Show date",
+    "showLunar": "Show Chinese lunar calendar",
+    "smallFont": "Small time font",
+    "title": "Clock",
+    "use12HourClock": "12-hour clock"
+  },
+  "other": {
+    "confirmPurgeData": {
+      "message": "This operation will reset the extension settings, ignored most visited sites, pinned or favorited sites, selected background images or videos, etc.",
+      "purging": "Clearing extension data..",
+      "title": "Are you sure you want to purge all data of this extension?"
+    },
+    "confirmPurgeWallpaper": {
+      "message": "This operation will delete the selected background images or videos.",
+      "purging": "Clearing wallpaper cache...",
+      "title": "Are you sure you want to purge all wallpaper cache?"
+    },
+    "customize_chrome_tips": "If you want to customize Chrome (e.g., change the color theme), you can only open the native new tab page of Chrome (chrome://new-tab-page) and click the icon in the bottom right corner to open the 'Customize Chrome' sidebar.\n",
+    "importExport": {
+      "settings": "Import / Export settings",
+      "bookmarks": "Import / Export bookmarks",
+      "customSearchEngines": "Import / Export custom search engines",
+      "export": "Export",
+      "import": "Import",
+      "importFailed": "Import failed: {{reason}}",
+      "importSuccess": "Import successful",
+      "invalidFileFormat": "Invalid file format",
+      "invalidJSON": "Invalid JSON format",
+      "noFileSelected": "No file selected",
+      "unknownError": "Unknown error",
+      "warningDialog": {
+        "content": "Importing will overwrite your current data. Please be cautious when using this feature!",
+        "no": "No",
+        "title": "Are you sure you want to import from the file?",
+        "yes": "Yes"
+      }
+    },
+    "language": "Language",
+    "purge": "Purge",
+    "purgeData": "Purge all data",
+    "purgeWallpaperData": "Purge wallpaper cache",
+    "sync": "Cloud sync",
+    "syncWarning": "Cloud sync does not support syncing the following items: local or online background images, most visited sites (including ignored sites), dark mode, and system follow status. Items that are not supported for sync will have an icon like this on the right:\n",
+    "title": "Other",
+    "want_to_customize_chrome": "Want to customize Chrome?",
+    "bookmarkViewMode": "Bookmark view mode",
+    "bookmarkViewModeWaterfall": "Waterfall",
+    "bookmarkViewModeTree": "Tree",
+    "bookmarkGlassBlur": "Bookmark glass blur"
+  },
+  "perf": {
+    "dialogAnimation": "Dialog animation",
+    "dialogBlur": "Dialog blur",
+    "dialogTransparent": "Dialog transparency",
+    "focusBlur": "Blur background on search focus",
+    "focusScale": "Scale background on search focus",
+    "searchBarBlur": "Search bar blur",
+    "searchBarTransparent": "Search bar transparency",
+    "settingsBtnBlur": "Settings button blur",
+    "settingsBtnTransparent": "Settings button transparency",
+    "title": "Performance",
+    "toggleAll": {
+      "animation": "Animation",
+      "blur": "Blur",
+      "disable": "Disable All",
+      "enable": "Enable All",
+      "transparent": "Transparency"
+    }
+  },
+  "search": {
+    "alwaysExpandSearchBar": "Always expand search bar",
+    "clickToChange": "Click to change",
+    "defaultSearchEngine": "Search engine",
+    "enableShadow": "Show search box shadow",
+    "openInNewTab": "Open in new tab",
+    "placeholder": "Search placeholder",
+    "recordSearchHistory": "Record search history",
+    "searchSuggestionProvider": "Search suggestion API",
+    "title": "Search"
+  },
+  "theme": {
+    "colorNames": {
+      "acgn": {
+        "aveMujica": "Ave Mujica",
+        "bocchi": "Bocchi the Rock!",
+        "kessoku": "Kessoku Band",
+        "luo": "Luo Tianyi",
+        "miku": "Hatsune Miku",
+        "mygo": "MyGO!!!!!",
+        "togeari": "TOGENASHI TOGEARI"
+      },
+      "classic": {
+        "antBlue": "Ant Blue",
+        "bellflower": "Deep Bellflower",
+        "crimson": "Kokiake Crimson",
+        "ink": "Chinese ink",
+        "lapisBlue": "Lapis Ruri",
+        "ochre": "Zhe Ochre",
+        "orangeRed": "Ouseki Amber",
+        "teal": "Nando Teal",
+        "yamabuki": "Yamabuki Gold",
+        "yellowGreen": "Moegi Green"
+      }
+    },
+    "colorfulMode": "Apply the theme color to more elements",
+    "darkMode": "Dark mode",
+    "lightMode": "Light mode",
+    "primaryColor": "Primary color",
+    "systemMode": "Follow system / browser",
+    "title": "Theme"
+  },
+  "title": "Settings",
+  "bookmarkMenu": {
+    "addBookmark": "Add bookmark",
+    "addFolder": "Add folder",
+    "addFolderSuccess": "Folder added successfully",
+    "addSuccess": "Bookmark added successfully",
+    "deleteConfirm": "Are you sure you want to delete \"{{title}}\"?",
+    "deleteError": "Failed to delete bookmark",
+    "deleteSuccess": "Bookmark deleted successfully",
+    "editBookmark": "Edit bookmark",
+    "editSuccess": "Bookmark updated successfully",
+    "empty": "No bookmarks found",
+    "name": "Name",
+    "namePlaceholder": "Enter bookmark name",
+    "noSearchResults": "No bookmarks found matching your search",
+    "refresh": "Refresh",
+    "saveError": "Failed to save bookmark",
+    "searchPlaceholder": "Search bookmarks...",
+    "title": "Bookmarks",
+    "url": "URL",
+    "urlPlaceholder": "Enter bookmark URL"
+  }
+}

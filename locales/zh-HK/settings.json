@@ -1,0 +1,178 @@
+{
+  "background": {
+    "blur": "模糊程度",
+    "enableVignetting": "暗角效果",
+    "maskColor": "遮罩顏色",
+    "maskOpacity": "遮罩不透明度",
+    "onlineTips": {
+      "a": "按下 Enter 鍵或點擊輸入框以外的區域以提交",
+      "b": "圖片快取策略取決於瀏覽器，離線時可能無法展示",
+      "c": "背景圖片載入前會短暫白屏，時間長短視乎你的網速",
+      "d": "請確認你使用的圖片 API 支援跨域請求，否則可能載入失敗"
+    },
+    "pauseWhenBlur": "當分頁失去焦點時暫停影片背景",
+    "tip": "如果深色模式背景沒有選擇，會繼續使用淺色模式的圖片/影片",
+    "title": "背景",
+    "type": {
+      "bing": "Bing 每日圖片",
+      "local": "本機圖片/影片",
+      "none": "無",
+      "online": "線上圖片",
+      "title": "背景類型"
+    },
+    "videoBlurTip": "啟用此開關可緩解同時開啟多個新分頁或多個視窗時的效能佔用",
+    "videoWarning": "使用影片作為背景會大量消耗 GPU 資源，建議避免同時開啟多個新分頁，以免佔滿 GPU。同時建議關閉時間分隔符閃爍、搜尋框模糊，以及點擊搜尋框時的縮放/模糊背景，以降低效能消耗",
+    "warning": {
+      "fileIsNotImage": "所選檔案並非圖片！",
+      "granted": "已授權訪問",
+      "notGranted": "尚未授權，無法讀取此網址",
+      "securityPolicy": "因應 Google 安全政策，需授權 {{host}} 的訪問權限才能取得背景圖片，是否允許本擴充功能訪問此網址？",
+      "title": "警告",
+      "tooLarge": {
+        "message": "檔案過大（{{size}}），可能會影響效能或佔用較多空間，是否繼續？",
+        "title": "檔案過大"
+      },
+      "unknownSource": "使用來自不明來源的圖片作背景可能會危及你的裝置安全，是否繼續？"
+    }
+  },
+  "clock": {
+    "blinkingColon": "閃爍時間分隔符",
+    "blinkingTip": "關閉可減輕持續嘅 GPU 使用",
+    "enableShadow": "顯示陰影",
+    "invertColorDark": "【時鐘】深色模式下使用深色文字",
+    "invertColorLight": "【時鐘】淺色模式下使用深色文字",
+    "showAMPM": "顯示「上午／下午」",
+    "showDate": "顯示日期",
+    "showLunar": "顯示農曆",
+    "smallFont": "時間小號字體",
+    "title": "時鐘",
+    "use12HourClock": "使用 12 小時制"
+  },
+  "other": {
+    "confirmPurgeData": {
+      "message": "此操作將會重設擴充設定、已忽略的常用網站、已釘選或收藏的網站，以及已選擇的背景圖片/影片等。",
+      "purging": "正在清除擴充功能資料...",
+      "title": "確定要清除所有資料？"
+    },
+    "confirmPurgeWallpaper": {
+      "message": "此操作將會刪除已選擇的背景圖片/影片。",
+      "purging": "正在清除壁紙快取...",
+      "title": "確定要清除壁紙快取？"
+    },
+    "customize_chrome_tips": "如果你想自訂 Chrome（例如更改主題顏色），你必須開啟 Chrome 原生的新分頁 (chrome://new-tab-page)，然後點右下角圖示以開啟「自訂 Chrome」側邊欄。\n",
+    "importExport": {
+      "settings": "匯入 / 匯出設定",
+      "bookmarks": "匯入 / 匯出書籤",
+      "customSearchEngines": "匯入 / 匯出自訂搜尋引擎",
+      "export": "匯出",
+      "import": "匯入",
+      "importFailed": "匯入失敗：{{reason}}",
+      "importSuccess": "匯入成功",
+      "invalidFileFormat": "檔案格式不正確",
+      "invalidJSON": "無效的 JSON 格式",
+      "noFileSelected": "未選擇檔案",
+      "unknownError": "未知錯誤",
+      "warningDialog": {
+        "content": "匯入會覆蓋你目前的資料，請謹慎使用此功能，是否繼續？",
+        "no": "取消",
+        "title": "你確定要從檔案匯入嗎？",
+        "yes": "繼續"
+      }
+    },
+    "language": "語言",
+    "purge": "清除",
+    "purgeData": "清除本擴充功能的資料",
+    "purgeWallpaperData": "清除壁紙快取",
+    "sync": "雲端同步",
+    "syncWarning": "雲端同步不支援同步以下項目：本機或線上背景圖片、最常瀏覽網站（包括已忽略的網站）、深色模式及跟隨系統狀態等。 不支援同步的項目會有如右側的標識：\n",
+    "title": "其他",
+    "want_to_customize_chrome": "想自訂 Chrome？",
+    "bookmarkViewMode": "書籤檢視模式",
+    "bookmarkViewModeWaterfall": "瀑布流",
+    "bookmarkViewModeTree": "樹形",
+    "bookmarkGlassBlur": "書籤玻璃模糊"
+  },
+  "perf": {
+    "dialogAnimation": "對話框動畫",
+    "dialogBlur": "對話框背景模糊",
+    "dialogTransparent": "對話框背景透明",
+    "focusBlur": "點擊搜尋框時背景模糊",
+    "focusScale": "點擊搜尋框時縮放背景",
+    "searchBarBlur": "搜尋框模糊",
+    "searchBarTransparent": "搜尋框透明",
+    "settingsBtnBlur": "設定按鈕模糊",
+    "settingsBtnTransparent": "設定按鈕透明",
+    "title": "效能",
+    "toggleAll": {
+      "animation": "動畫",
+      "blur": "模糊效果",
+      "disable": "一鍵停用所有",
+      "enable": "一鍵啟用所有",
+      "transparent": "透明效果"
+    }
+  },
+  "search": {
+    "alwaysExpandSearchBar": "一直展開搜尋框",
+    "clickToChange": "點擊更改",
+    "defaultSearchEngine": "預設搜尋引擎",
+    "enableShadow": "顯示搜尋框陰影",
+    "openInNewTab": "在新分頁中開啟",
+    "placeholder": "搜尋框占位文字",
+    "recordSearchHistory": "記錄搜尋歷史",
+    "searchSuggestionProvider": "搜尋建議 API",
+    "title": "搜尋"
+  },
+  "theme": {
+    "colorNames": {
+      "acgn": {
+        "aveMujica": "Ave Mujica",
+        "bocchi": "後藤ひとり",
+        "kessoku": "結束バンド",
+        "luo": "洛天依",
+        "miku": "初音ミク",
+        "mygo": "MyGO!!!!!",
+        "togeari": "TOGENASHI TOGEARI"
+      },
+      "classic": {
+        "antBlue": "Ant 蓝",
+        "bellflower": "紺桔梗",
+        "crimson": "深緋",
+        "ink": "墨",
+        "lapisBlue": "瑠璃",
+        "ochre": "赭",
+        "orangeRed": "黄赤",
+        "teal": "納戸",
+        "yamabuki": "山吹",
+        "yellowGreen": "萌黄"
+      }
+    },
+    "colorfulMode": "將主題色應用到更多介面元素",
+    "darkMode": "深色模式",
+    "lightMode": "淺色模式",
+    "primaryColor": "主題顏色",
+    "systemMode": "跟隨系統設定 / 瀏覽器",
+    "title": "主題"
+  },
+  "title": "設定",
+  "bookmarkMenu": {
+    "addBookmark": "新增書籤",
+    "addFolder": "新增資料夾",
+    "addFolderSuccess": "資料夾新增成功",
+    "addSuccess": "書籤新增成功",
+    "deleteConfirm": "確定要刪除「{{title}}」嗎？",
+    "deleteError": "刪除書籤失敗",
+    "deleteSuccess": "書籤刪除成功",
+    "editBookmark": "編輯書籤",
+    "editSuccess": "書籤更新成功",
+    "empty": "沒有找到書籤",
+    "name": "名稱",
+    "namePlaceholder": "請輸入書籤名稱",
+    "noSearchResults": "沒有找到符合的書籤",
+    "refresh": "重新整理",
+    "saveError": "儲存書籤失敗",
+    "searchPlaceholder": "搜尋書籤...",
+    "title": "書籤",
+    "url": "網址",
+    "urlPlaceholder": "請輸入書籤網址"
+  }
+}

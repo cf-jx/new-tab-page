@@ -1,0 +1,74 @@
+import { defaultSettings } from '../default'
+import type { SettingsInterfaceVer5, SettingsInterfaceVer6 } from '../types'
+import { searchEnginesMap } from './searchEnginesMap'
+
+export function migrateFromVer5To6(oldSettings: SettingsInterfaceVer5): SettingsInterfaceVer6 {
+  return {
+    primaryColor: oldSettings.primaryColor,
+    time: {
+      isMeridiem: oldSettings.time.isMeridiem,
+      showMeridiem: oldSettings.time.showMeridiem,
+      showDate: oldSettings.time.showDate,
+      showLunar: oldSettings.time.showLunar,
+      small: defaultSettings.time.small,
+      enableShadow: oldSettings.time.enableShadow,
+      blinkingColon: defaultSettings.time.blinkingColon,
+      invertColor: {
+        light: oldSettings.time.invertColor.light,
+        night: oldSettings.time.invertColor.night
+      }
+    },
+    search: {
+      autoFocus: oldSettings.search.autoFocus,
+      selectedSearchSuggestionAPI: oldSettings.search.selectedSearchSuggestionAPI,
+      selectedSearchEngine: searchEnginesMap[oldSettings.search.selectedSearchEngine],
+      searchInNewTab: oldSettings.search.searchInNewTab,
+      recordSearchHistory: oldSettings.search.recordSearchHistory,
+      enableShadow: oldSettings.search.enableShadow,
+      placeholder: defaultSettings.search.placeholder
+    },
+    background: {
+      bgType: oldSettings.background.bgType,
+      enableVignetting: oldSettings.background.enableVignetting,
+      blurIntensity: oldSettings.background.blurIntensity,
+      bgMaskOpacity: oldSettings.background.bgMaskOpacity,
+      lightMaskColor: oldSettings.background.lightMaskColor,
+      nightMaskColor: oldSettings.background.nightMaskColor,
+      onlineUrl: oldSettings.background.onlineUrl
+    },
+    localBackground: {
+      id: oldSettings.localBackground.id,
+      url: oldSettings.localBackground.url
+    },
+    localDarkBackground: {
+      id: defaultSettings.localDarkBackground.id,
+      url: defaultSettings.localDarkBackground.url
+    },
+    bingBackground: {
+      id: oldSettings.bingBackground.id,
+      url: oldSettings.bingBackground.url,
+      updateDate: oldSettings.bingBackground.updateDate
+    },
+    shortcut: {
+      enabled: oldSettings.shortcut.enabled,
+      enableTopSites: oldSettings.shortcut.enableTopSites,
+      enableAreaShadow: oldSettings.shortcut.enableShadow,
+      enableShadow: defaultSettings.shortcut.enableShadow,
+      rows: oldSettings.shortcut.rows,
+      columns: oldSettings.shortcut.columns,
+      itemMarginH: oldSettings.shortcut.itemMarginH,
+      itemMarginV: oldSettings.shortcut.itemMarginV,
+      showShortcutTitle: oldSettings.shortcut.showShortcutTitle,
+      showPinnedIcon: oldSettings.shortcut.showPinnedIcon,
+      showShortcutContainerBg: oldSettings.shortcut.showShortcutContainerBg,
+      iconSize: oldSettings.shortcut.iconSize,
+      whiteTextInLightMode: oldSettings.shortcut.whiteTextInLightMode,
+      marginTop: oldSettings.shortcut.marginTop
+    },
+    sync: {
+      enabled: oldSettings.sync.enabled
+    },
+    pluginVersion: oldSettings.pluginVersion,
+    version: 6
+  }
+}

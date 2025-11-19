@@ -1,0 +1,105 @@
+{
+  "common": {
+    "cancel": "No",
+    "confirm": "Yes",
+    "enable": "Enable",
+    "warning": "Warning",
+    "edit": "Edit",
+    "save": "Save",
+    "delete": "Delete",
+    "undo": "Undo",
+    "icon": "Icon",
+    "name": "Name",
+    "url": "URL",
+    "loading": "Loading...",
+    "settings": "Settings"
+  },
+  "bookmarkMenu": {
+    "title": "Bookmarks",
+    "empty": "No bookmarks",
+    "addBookmark": "Add Bookmark",
+    "addFolder": "Add Folder",
+    "addChildBookmark": "Add Child Bookmark",
+    "addChildFolder": "Add Child Folder",
+    "refresh": "Refresh",
+    "editBookmark": "Edit Bookmark",
+    "name": "Name",
+    "url": "URL",
+    "namePlaceholder": "Enter name",
+    "urlPlaceholder": "Enter URL",
+    "addSuccess": "Added successfully",
+    "addFolderSuccess": "Folder added successfully",
+    "editSuccess": "Edited successfully",
+    "saveError": "Save failed",
+    "deleteConfirm": "Confirm delete \"{{title}}\"?",
+    "deleteSuccess": "Deleted successfully",
+    "deleteError": "Delete failed",
+    "searchPlaceholder": "Search bookmarks...",
+    "noSearchResults": "No bookmarks matched your search.",
+    "inlineHint": "Right-click this area to browse your bookmark folders.",
+    "folderEmpty": "Nothing in this category yet.",
+    "folderView": "Viewing \"{{name}}\"",
+    "untitledFolder": "Untitled folder"
+  },
+  "customSearchEngine": {
+    "title": "Custom Search Engine",
+    "add": "Add Custom Search Engine",
+    "addDialog": {
+      "urlHelp": "URL must contain %s as a placeholder for search keywords",
+      "nameRequiredError": "Name cannot be empty",
+      "invalidUrlError": "Invalid URL or missing %s placeholder"
+    },
+    "iconUpload": {
+      "confirmSvgTitle": "You selected an SVG image",
+      "confirmSvgDesc": "Are you sure you want to use SVG images? To avoid XSS and XXE attacks, Lemon New Tab will process the image, so it may cause the SVG image not to be displayed as expected. But even after processing, you may still be attacked by the image you choose, so make sure the image source you use is safe.",
+      "confirmSvgOKBtn": "Right",
+      "confirmSvgCancelBtn": "Oh no",
+      "tooLargeImageError": "The image size exceeds 100KiB, please reselect a new one~"
+    },
+    "edit": "Edit Custom Search Engine",
+    "deleteConfirm": "Are you sure you want to delete search engine \"{{name}}\"?"
+  },
+  "menu": {
+    "about": "About",
+    "help": "Help / Feedback",
+    "searchEnginePreference": "Search Engine Preference",
+    "sponsor": "Sponsor"
+  },
+  "time": {
+    "lateNight": "",
+    "dawn": "",
+    "morning": "",
+    "noon": "",
+    "afternoon": "",
+    "dusk": "",
+    "evening": ""
+  },
+  "notification": {
+    "bingWallpaper": {
+      "error": {
+        "message": "Please check the console output in developer tools.",
+        "title": "Failed to get Bing wallpaper"
+      },
+      "get": "Fetching Bing wallpaper..."
+    }
+  },
+  "search": {
+    "placeholder": "Search",
+    "purgeSearchHistory": "Clear Search History",
+    "searchEngineNotFound": "Search engine not found",
+    "searchEngineMenu": {
+      "current": "Current",
+      "tipPrefix": "Tip: Press",
+      "tipSuffix": "to switch search engine."
+    }
+  },
+  "searchEngineMenu": {
+    "baidu": "Baidu",
+    "bing": "Bing",
+    "duckduckgo": "DuckDuckGo",
+    "google": "Google",
+    "yandex": "Yandex"
+  },
+  "sponsor": "I first built this extension in my free time to meet my own needs, and I’m glad it’s useful for you too! If you’d like to support me, you can reach me at: redlnn@outlook.com. Thanks for your support!",
+  "title": "New Tab"
+}

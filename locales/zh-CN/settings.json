@@ -1,0 +1,178 @@
+{
+  "background": {
+    "blur": "模糊强度",
+    "enableVignetting": "暗角效果",
+    "maskColor": "遮罩颜色",
+    "maskOpacity": "遮罩不透明度",
+    "onlineTips": {
+      "a": "按下回车键或者输入框失去焦点后提交",
+      "b": "壁纸缓存策略却决于浏览器，断网后会获取不到壁纸",
+      "c": "壁纸加载完成前会白屏一段时间，时长取决于你的网速",
+      "d": "请确保你使用的壁纸 API 允许跨域请求，否则会加载失败"
+    },
+    "pauseWhenBlur": "标签页失去焦点时暂停视频背景",
+    "tip": "深色模式背景没有选择的话会继续使用浅色模式的图片/视频噢",
+    "title": "背景",
+    "type": {
+      "bing": "Bing 每日一图",
+      "local": "本地图片/视频",
+      "none": "无",
+      "online": "在线图片",
+      "title": "背景类型"
+    },
+    "videoBlurTip": "打开此开关以缓解多开新标签页或多个窗口同屏时的性能占用",
+    "videoWarning": "使用视频作为背景将会大量消耗 GPU 资源，建议避免同时开多个新标签页以免吃满 GPU，建议禁用时间分隔符闪烁、搜索框模糊、点击搜索框缩放/模糊背景以降低性能消耗",
+    "warning": {
+      "fileIsNotImage": "所选文件不是图片！",
+      "granted": "已授予访问权限",
+      "notGranted": "未授予权限，无法访问该地址",
+      "securityPolicy": "由于 Google 的安全策略，需要授予 {{host}} 的访问权限才能获取背景，是否允许扩展申请访问该地址的权限",
+      "title": "警告",
+      "tooLarge": {
+        "message": "文件过大（{{size}}），可能会影响性能或占用较多空间，是否继续？",
+        "title": "文件过大"
+      },
+      "unknownSource": "使用未知来源的图片作为背景可能会使你的设备遭到攻击，是否继续？"
+    }
+  },
+  "clock": {
+    "blinkingColon": "闪烁时间分隔符",
+    "blinkingTip": "关闭可缓解持续性的 GPU 占用",
+    "enableShadow": "显示阴影",
+    "invertColorDark": "【时钟】深色模式下使用深色文字",
+    "invertColorLight": "【时钟】浅色模式下使用深色文字",
+    "showAMPM": "显示「上午 / 下午」",
+    "showDate": "显示日期",
+    "showLunar": "显示农历",
+    "smallFont": "时间小号字体",
+    "title": "时钟",
+    "use12HourClock": "使用 12 小时制"
+  },
+  "other": {
+    "confirmPurgeData": {
+      "message": "该操作将会重置扩展设置、已忽略的最常访问网站、收藏/置顶的网站、已选择的背景图片/视频等。",
+      "purging": "正在清除扩展数据...",
+      "title": "确定要清除所有数据吗？"
+    },
+    "confirmPurgeWallpaper": {
+      "message": "该操作将会删除已选择的背景图片/视频。",
+      "purging": "正在清除壁纸缓存...",
+      "title": "确定要清除壁纸缓存吗？"
+    },
+    "customize_chrome_tips": "假如你要自定义 Chrome（例如更改颜色主题）的话，你只能打开 Chrome 的原生新标签页 (chrome://new-tab-page) 并点击右下角的图标来打开「自定义 Chrome」侧边栏。\n",
+    "importExport": {
+      "settings": "导入 / 导出设置",
+      "bookmarks": "导入 / 导出书签",
+      "customSearchEngines": "导入 / 导出自定义搜索引擎",
+      "export": "导出",
+      "import": "导入",
+      "importFailed": "导入失败：{{reason}}",
+      "importSuccess": "导入成功",
+      "invalidFileFormat": "文件格式不正确",
+      "invalidJSON": "无效的 JSON 格式",
+      "noFileSelected": "未选择文件",
+      "unknownError": "未知错误",
+      "warningDialog": {
+        "content": "导入会覆盖你当前的数据，请谨慎使用该功能，是否继续？",
+        "no": "不要啊",
+        "title": "你确定要从文件导入吗？",
+        "yes": "继续"
+      }
+    },
+    "language": "语言",
+    "purge": "清除",
+    "purgeData": "清除扩展数据",
+    "purgeWallpaperData": "清除壁纸缓存",
+    "sync": "云同步",
+    "syncWarning": "云同步不能同步以下内容：本地或在线背景图片、最常访问网站（含已忽略的网站）、深色模式及跟随系统状态等。 不支持同步的项目后面会有如右侧的标识：\n",
+    "title": "其他",
+    "want_to_customize_chrome": "要自定义Chrome？",
+    "bookmarkViewMode": "书签视图模式",
+    "bookmarkViewModeWaterfall": "瀑布流",
+    "bookmarkViewModeTree": "树形",
+    "bookmarkGlassBlur": "书签玻璃模糊"
+  },
+  "perf": {
+    "dialogAnimation": "弹窗动画",
+    "dialogBlur": "弹窗背景模糊",
+    "dialogTransparent": "弹窗背景透明",
+    "focusBlur": "点击搜索框模糊背景",
+    "focusScale": "点击搜索框缩放背景",
+    "searchBarBlur": "搜索框模糊",
+    "searchBarTransparent": "搜索框透明",
+    "settingsBtnBlur": "设置按钮模糊",
+    "settingsBtnTransparent": "设置按钮透明",
+    "title": "性能",
+    "toggleAll": {
+      "animation": "动画",
+      "blur": "模糊效果",
+      "disable": "一键禁用所有",
+      "enable": "一键启用所有",
+      "transparent": "透明效果"
+    }
+  },
+  "search": {
+    "alwaysExpandSearchBar": "一直展开搜索框",
+    "clickToChange": "点击更改",
+    "defaultSearchEngine": "搜索引擎",
+    "enableShadow": "显示搜索框阴影",
+    "openInNewTab": "在新标签页中打开",
+    "placeholder": "搜索框占位文字",
+    "recordSearchHistory": "记录搜索历史",
+    "searchSuggestionProvider": "搜索建议 API",
+    "title": "搜索"
+  },
+  "theme": {
+    "colorNames": {
+      "acgn": {
+        "aveMujica": "Ave Mujica",
+        "bocchi": "後藤ひとり",
+        "kessoku": "結束バンド",
+        "luo": "洛天依",
+        "miku": "初音ミク",
+        "mygo": "MyGO!!!!!",
+        "togeari": "TOGENASHI TOGEARI"
+      },
+      "classic": {
+        "antBlue": "Ant 蓝",
+        "bellflower": "紺桔梗",
+        "crimson": "深緋",
+        "ink": "墨",
+        "lapisBlue": "瑠璃",
+        "ochre": "赭",
+        "orangeRed": "黄赤",
+        "teal": "納戸",
+        "yamabuki": "山吹",
+        "yellowGreen": "萌黄"
+      }
+    },
+    "colorfulMode": "将主题色应用到更多元素",
+    "darkMode": "深色模式",
+    "lightMode": "浅色模式",
+    "primaryColor": "主题色",
+    "systemMode": "跟随系统 / 浏览器",
+    "title": "主题"
+  },
+  "title": "设置",
+  "bookmarkMenu": {
+    "addBookmark": "添加书签",
+    "addFolder": "添加文件夹",
+    "addFolderSuccess": "文件夹添加成功",
+    "addSuccess": "书签添加成功",
+    "deleteConfirm": "确定要删除\"{{title}}\"吗？",
+    "deleteError": "删除书签失败",
+    "deleteSuccess": "书签删除成功",
+    "editBookmark": "编辑书签",
+    "editSuccess": "书签更新成功",
+    "empty": "没有找到书签",
+    "name": "名称",
+    "namePlaceholder": "请输入书签名称",
+    "noSearchResults": "没有找到匹配的书签",
+    "refresh": "刷新",
+    "saveError": "保存书签失败",
+    "searchPlaceholder": "搜索书签...",
+    "title": "书签",
+    "url": "网址",
+    "urlPlaceholder": "请输入书签网址"
+  }
+}

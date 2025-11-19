@@ -1,0 +1,66 @@
+{
+  "i18n-ally.localesPaths": ["locales"],
+  "i18n-ally.fullReloadOnChanged": true,
+  "i18n-ally.keystyle": "nested",
+  "i18n-ally.sortKeys": true,
+  "i18n-ally.keepFulfilled": true,
+  "i18n-ally.namespace": true,
+  "i18n-ally.sourceLanguage": "zh-CN",
+  "i18n-ally.displayLanguage": "zh-CN",
+  "i18n-ally.extract.keygenStyle": "camelCase",
+  "i18n-ally.pathMatcher": "{locale}/{namespace}.{ext}",
+  "i18n-ally.extract.autoDetect": true,
+  "i18n-ally.defaultNamespace": "newtab",
+  "markdownlint.config": {
+    "MD033": false,
+    "MD024": false,
+    "MD041": false
+  },
+  "editor.codeActionsOnSave": {
+    "source.fixAll": "explicit"
+  },
+  "editor.formatOnSave": true,
+  "css.validate": false,
+  "less.validate": false,
+  "scss.validate": false,
+  "tsImportSorter.configuration.groupRules": [
+    "^react(-dom)?$",
+    "^@angular/",
+    ["^pinia", "^vue$", "^@vueuse"],
+    "^node:",
+    "^@(?!newtab)[^/]+$",
+    {},
+    "^#",
+    "^@/package.json$",
+    "^@/",
+    "^@newtab",
+    "^[.]"
+  ],
+  "chat.tools.terminal.autoApprove": {
+    "pnpm -s type-check": {
+      "approve": true,
+      "matchCommandLine": true
+    },
+    "pnpm -s lint": {
+      "approve": true,
+      "matchCommandLine": true
+    },
+    "pnpm type-check": {
+      "approve": true,
+      "matchCommandLine": true
+    },
+    "pnpm lint": {
+      "approve": true,
+      "matchCommandLine": true
+    }
+  },
+  "markdownlint.lintWorkspaceGlobs": [
+    "**/*.{md,mkd,mdwn,mdown,markdown,markdn,mdtxt,mdtext,workbook}",
+    "!**/*.code-search",
+    "!**/bower_components",
+    "!**/node_modules",
+    "!**/.git",
+    "!**/vendor",
+    "!**/.serena"
+  ]
+}
