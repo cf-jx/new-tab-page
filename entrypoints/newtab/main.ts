@@ -115,7 +115,7 @@ export const main = async () => {
     }
   })
 
-  app.mount('body')
+  app.mount('#app')
 
   if (settings.sync.enabled) {
     initSyncSettings(settings)

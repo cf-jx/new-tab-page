@@ -24,7 +24,7 @@ import SearchSuggestionArea from './components/SearchSuggestionArea.vue'
 const searchBox = ref<HTMLDivElement>()
 const searchForm = ref<HTMLFormElement>()
 const searchInput = ref<HTMLInputElement>()
-const suggedtionArea = ref<InstanceType<typeof SearchSuggestionArea>>()
+const suggestionArea = ref<InstanceType<typeof SearchSuggestionArea>>()
 const searchEngineMenuRef = ref<typeof SearchEngineMenu>()
 
 const { t } = useTranslation()
@@ -65,7 +65,7 @@ const searchPlaceholder = computed(() =>
 function resetSearch() {
   searchText.value = ''
   originSearchText.value = ''
-  suggedtionArea.value?.clearSearchSuggestions()
+  suggestionArea.value?.clearSearchSuggestions()
   searchForm.value?.classList.remove('search-box__form--focus')
   focusStore.blur()
 }
@@ -78,7 +78,7 @@ watch(isWindowFocused, (isFocused) => {
   searchInput.value?.blur()
 })
 
-onClickOutside(searchBox, (e) => {
+onClickOutside(searchBox, () => {
   if (!focusStore.isFocused) {
     return
   }
@@ -94,7 +94,7 @@ onClickOutside(searchBox, (e) => {
 
 function handleFocus() {
   searchForm.value?.classList.add('search-box__form--focus')
-  suggedtionArea.value?.showSearchHistories()
+  suggestionArea.value?.showSearchHistories()
   focusStore.focus()
 }
 
@@ -116,16 +116,16 @@ function handleInput() {
   if (isComposing.value) {
     return
   }
-  suggedtionArea.value?.handleInput()
+  suggestionArea.value?.handleInput()
 }
 
 function navigateSuggestions(direction: number) {
-  const suggestionsLength = suggedtionArea.value!.searchSuggestions.length
+  const suggestionsLength = suggestionArea.value!.searchSuggestions.length
   if (suggestionsLength <= 0) {
     return
   }
-  const _current = suggedtionArea.value!.currentActiveSuggest
-  suggedtionArea.value!.clearActiveSuggest()
+  const _current = suggestionArea.value!.currentActiveSuggest
+  suggestionArea.value!.clearActiveSuggest()
 
   if (originSearchText.value === null) {
     originSearchText.value = searchText.value
@@ -138,7 +138,7 @@ function navigateSuggestions(direction: number) {
     if (newIndex < 0 || newIndex >= suggestionsLength) {
       searchText.value = originSearchText.value || ''
       originSearchText.value = ''
-      suggedtionArea.value!.currentActiveSuggest = null
+      suggestionArea.value!.currentActiveSuggest = null
     } else {
       activeOneSuggest(newIndex)
     }
@@ -154,13 +154,13 @@ function handleDown() {
 }
 
 function activeOneSuggest(index: number) {
-  const suggestions = suggedtionArea.value!.searchSuggestionArea?.children
+  const suggestions = suggestionArea.value!.searchSuggestionArea?.children
   if (!suggestions) {
     return
   }
   suggestions[index]?.classList.add('active')
-  suggedtionArea.value!.currentActiveSuggest = index
-  searchText.value = suggedtionArea.value!.searchSuggestions[index]!
+  suggestionArea.value!.currentActiveSuggest = index
+  searchText.value = suggestionArea.value!.searchSuggestions[index]!
 }
 
 function handleTabNavigation(direction: 1 | -1) {
@@ -222,7 +222,7 @@ const doSearchWithText = async (text: string, newtab: boolean = false) => {
     searchUrl.replace('%s', encodeURIComponent(text)),
     newtab || settings.search.searchInNewTab ? '_blank' : '_self'
   )
-  suggedtionArea.value!.clearSearchSuggestions()
+  suggestionArea.value!.clearSearchSuggestions()
 }
 
 function doSearch() {
@@ -266,7 +266,7 @@ onMounted(() => {
       </div>
     </form>
     <search-suggestion-area
-      ref="suggedtionArea"
+      ref="suggestionArea"
       :search-text="searchText"
       :origin-search-text="originSearchText"
       :search-form-width="searchFormWidth"

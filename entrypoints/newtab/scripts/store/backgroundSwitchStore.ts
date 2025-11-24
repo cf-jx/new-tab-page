@@ -1,6 +1,6 @@
 import { defineStore } from 'pinia'
 
-export const useBgSwtichStore = defineStore('bgSwitching', () => {
+export const useBgSwitchStore = defineStore('bgSwitching', () => {
   const isSwitching = ref(false)
 
   const start = () => {

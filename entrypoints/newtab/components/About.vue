@@ -2,24 +2,17 @@
 import { useDateFormat, useNow } from '@vueuse/core'
 
 import { Chrome, Edge, Firefox, Github } from '@vicons/fa'
-import { useTranslation } from 'i18next-vue'
 import { browser } from 'wxt/browser'
 
 import { version } from '@/package.json'
 
-import { useSettingsStore } from '@/shared/settings'
-
 import BaseDialog from '@newtab/components/BaseDialog.vue'
 import { useDialog } from '@newtab/composables/useDialog'
-
-const { t } = useTranslation()
 
 const year = useDateFormat(useNow(), 'YYYY')
 
 const { opened, show, hide, toggle } = useDialog()
 defineExpose({ show, hide, toggle })
-
-const settings = useSettingsStore()
 </script>
 
 <template>

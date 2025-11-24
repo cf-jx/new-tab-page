@@ -32,7 +32,12 @@
         "message": "The file is too large ({{size}}) and may affect performance or occupy significant storage. Do you want to continue?",
         "title": "Large File Warning"
       },
-      "unknownSource": "Using images from unknown sources as backgrounds may expose your device to attacks. Do you want to continue?"
+      "unknownSource": "Using images from unknown sources as backgrounds may expose your device to attacks. Do you want to continue?",
+      "note": "Only continue if you trust the image source. Consider opening the link in a new tab to verify it first.",
+      "actions": {
+        "cancel": "No, thanks",
+        "continue": "Continue"
+      }
     }
   },
   "clock": {

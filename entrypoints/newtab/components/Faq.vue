@@ -14,7 +14,7 @@ defineExpose({ show, hide, toggle })
 const { t } = useTranslation('faq')
 
 function handleEmailClick() {
-  navigator.clipboard.writeText('redlnn@outlook.com')
+  navigator.clipboard.writeText('scf20230219@gmail.com')
   ElMessage.success(t('helpSection.emailCopied'))
 }
 </script>
@@ -26,7 +26,7 @@ function handleEmailClick() {
       <div class="issue-links">
         <a
           class="issue-link"
-          href="https://github.com/Redlnn/lemon-new-tab-page/issues/new"
+          href="https://github.com/cf-jx/new-tab-page/issues/new"
           target="_blank"
         >
           <span class="issue-link-icon">

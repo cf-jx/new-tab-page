@@ -12,17 +12,12 @@ const emit = defineEmits<{
   (e: 'open-about'): void
   (e: 'open-search-engine-preference'): void
   (e: 'open-faq'): void
+  (e: 'open-sponsor'): void
 }>()
 
 const { t } = useTranslation('newtab')
 const settings = useSettingsStore()
 
-function sponsorMessage() {
-  ElMessageBox.alert(t('sponsor'), t('menu.sponsor'), {
-    closeOnPressEscape: true,
-    closeOnClickModal: true
-  })
-}
 </script>
 
 <template>
@@ -38,7 +33,7 @@ function sponsorMessage() {
       )
     "
     :show-arrow="false"
-    placement="top-end"
+    placement="bottom-end"
     trigger="click"
     @contextmenu.prevent.stop
   >
@@ -67,7 +62,7 @@ function sponsorMessage() {
           <el-icon :size="17"><help-filled /></el-icon>
           <span>{{ t('menu.help') }}</span>
         </el-dropdown-item>
-        <el-dropdown-item @click="sponsorMessage">
+        <el-dropdown-item @click="emit('open-sponsor')">
           <el-icon :size="17"><heart-filled /></el-icon>
           <span>{{ t('menu.sponsor') }}</span>
         </el-dropdown-item>

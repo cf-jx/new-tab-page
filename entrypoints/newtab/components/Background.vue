@@ -3,11 +3,11 @@ import { useDark, useDocumentVisibility, useWindowFocus } from '@vueuse/core'
 
 import { BgType, useSettingsStore } from '@/shared/settings'
 
-import { useBgSwtichStore, useFocusStore } from '@newtab/scripts/store'
+import { useBgSwitchStore, useFocusStore } from '@newtab/scripts/store'
 
 const focusStore = useFocusStore()
 const settings = useSettingsStore()
-const switchStore = useBgSwtichStore()
+const switchStore = useBgSwitchStore()
 const backgroundWrapper = ref<HTMLDivElement>()
 const imageRef = ref<HTMLDivElement>()
 const videoRef = ref<HTMLVideoElement>()

@@ -17,12 +17,17 @@
   "bookmarkMenu": {
     "title": "书签",
     "empty": "暂无书签",
+    "close": "关闭书签",
+    "goBack": "返回上一级",
     "addBookmark": "添加书签",
-    "addFolder": "添加文件夹",
+    "addCurrentPage": "添加当前页面",
+    "addFolder": "添加书签分类文件夹",
     "refresh": "刷新",
     "editBookmark": "编辑书签",
     "name": "名称",
     "url": "网址",
+    "folder": "文件夹",
+    "selectFolder": "请选择文件夹",
     "namePlaceholder": "请输入名称",
     "urlPlaceholder": "请输入网址",
     "addSuccess": "添加成功",
@@ -37,7 +42,9 @@
     "inlineHint": "在此区域点击右键即可浏览书签分类。",
     "folderEmpty": "该分类下还没有书签。",
     "folderView": "正在查看「{{name}}」",
-    "untitledFolder": "未命名文件夹"
+    "untitledFolder": "未命名文件夹",
+    "addChildBookmark": "添加子书签",
+    "addChildFolder": "添加子文件夹"
   },
   "customSearchEngine": {
     "title": "自定义搜索引擎",
@@ -61,7 +68,7 @@
     "about": "关于",
     "help": "帮助和反馈",
     "searchEnginePreference": "搜索引擎偏好",
-    "sponsor": "支持我们"
+    "sponsor": "支持我"
   },
   "time": {
     "lateNight": "深夜",
@@ -98,6 +105,6 @@
     "google": "Google",
     "yandex": "Yandex"
   },
-  "sponsor": "这个扩展是我当初利用业余时间为了满足自己的需求而开始开发的。很高兴它也对你有帮助！如果你真的想支持我，可以联系我的邮箱：redlnn@outlook.com。感谢你的关注与支持！",
-  "title": "新标签页"
+  "sponsor": "scf20230219@gmail.com",
+  "title": "柠檬起始页"
 }

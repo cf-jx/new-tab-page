@@ -1,5 +1,5 @@
 <script lang="ts" setup>
-import { defineAsyncComponent, onBeforeMount, onMounted, provide, ref, watch, computed } from 'vue'
+import { defineAsyncComponent, onBeforeMount, onMounted, provide, ref, watch } from 'vue'
 import { promiseTimeout, useColorMode, useDark, usePreferredDark } from '@vueuse/core'
 
 import type { Language } from 'element-plus/es/locale'
@@ -17,11 +17,12 @@ import SearchBox from '@newtab/components/SearchBox/index.vue'
 import SettingsBtn from '@newtab/components/SettingsBtn.vue'
 import type SettingsPageComponent from '@newtab/components/SettingsPage/index.vue'
 import type AboutCompComponent from '@newtab/components/About.vue'
-import type FaqComponent from '@newtab/components/Faq.vue'
+import type SponsorComponent from '@newtab/components/Sponsor.vue'
+
 import type SearchEnginesSwitcherComponent from '@newtab/components/SearchEnginesSwitcher/index.vue'
 import BookmarkMenu from '@newtab/components/BookmarkMenu/index.vue'
 import { getBingWallpaperURL } from '@newtab/scripts/api/bingWallpaper'
-import { useBgSwtichStore } from '@newtab/scripts/store'
+import { useBgSwitchStore } from '@newtab/scripts/store'
 
 const { t, i18next } = useTranslation('sync')
 
@@ -61,22 +62,25 @@ i18next.on('languageChanged', onLngChanged)
 const SettingsPage = defineAsyncComponent(() => import('@newtab/components/SettingsPage/index.vue'))
 const Faq = defineAsyncComponent(() => import('@newtab/components/Faq.vue'))
 const AboutComp = defineAsyncComponent(() => import('@newtab/components/About.vue'))
+const Sponsor = defineAsyncComponent(() => import('@newtab/components/Sponsor.vue'))
 const SearchEnginesSwitcher = defineAsyncComponent(
   () => import('@newtab/components/SearchEnginesSwitcher/index.vue')
 )
 type SettingsPageInstance = InstanceType<typeof SettingsPageComponent>
 type FaqInstance = InstanceType<typeof Faq>
 type AboutCompInstance = InstanceType<typeof AboutCompComponent>
+type SponsorInstance = InstanceType<typeof SponsorComponent>
 type SearchEnginesSwitcherInstance = InstanceType<typeof SearchEnginesSwitcherComponent>
 
 const SettingsPageRef = ref<SettingsPageInstance>()
 const FaqRef = ref<FaqInstance>()
 const AboutRef = ref<AboutCompInstance>()
+const SponsorRef = ref<SponsorInstance>()
 const SESwitcherRef = ref<SearchEnginesSwitcherInstance>()
 
 const settings = useSettingsStore()
 const isDark = useDark()
-const switchStore = useBgSwtichStore()
+const switchStore = useBgSwitchStore()
 const bgURL = ref('')
 const settingsBtnVisible = ref(false)
 
@@ -319,10 +323,12 @@ provide(OPEN_SEARCH_ENGINE_PREFERENCE, () => SESwitcherRef.value?.show())
       @open-about="AboutRef?.toggle"
       @open-search-engine-preference="SESwitcherRef?.show"
       @open-faq="FaqRef?.show"
+      @open-sponsor="SponsorRef?.show"
     />
     <settings-page ref="SettingsPageRef" />
     <faq ref="FaqRef" />
     <about-comp ref="AboutRef" />
     <search-engines-switcher ref="SESwitcherRef" />
+    <sponsor ref="SponsorRef" />
   </el-config-provider>
 </template>

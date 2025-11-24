@@ -8,14 +8,16 @@ import RefreshIcon from '@vicons/material/es/RefreshRound'
 import Search from '@vicons/material/es/SearchRound'
 import EditIcon from '@vicons/material/es/EditRound'
 import DeleteIcon from '@vicons/material/es/DeleteRound'
+import ArrowDown from '@vicons/material/es/KeyboardArrowDownRound'
 import { useTranslation } from 'i18next-vue'
 import { browser } from 'wxt/browser'
 import Fuse from 'fuse.js'
+import { VueDraggable } from 'vue-draggable-plus'
 
 import { getBookmarkFolders, type ChromeBookmarkNode } from '@/shared/chromeBookmarks'
 import { useSettingsStore } from '@/shared/settings'
 
-import BookmarkTreeItem from './BookmarkTreeItem.vue'
+
 
 const emit = defineEmits<{
   (e: 'panel-visibility-change', visible: boolean): void
@@ -45,6 +47,83 @@ const currentBookmarks = computed(() =>
   currentItems.value.filter((node) => node.url && !node.children)
 )
 
+// 限制显示的书签：如果未展开且数量大于10，只显示前10个
+const limitedBookmarks = computed(() => {
+  if (isExpanded.value) return currentBookmarks.value
+  return currentBookmarks.value.slice(0, 10)
+})
+
+const hasMoreBookmarks = computed(() => {
+  return !isExpanded.value && currentBookmarks.value.length > 10
+})
+
+const localFolders = ref<ChromeBookmarkNode[]>([])
+const isDragging = ref(false)
+
+watch(currentFolders, (newVal) => {
+  localFolders.value = [...newVal]
+}, { immediate: true })
+
+// 智能网格布局算法：Bento 重点法 + 自适应
+const getGridStyle = (index: number, total: number) => {
+  // 拖拽过程中，强制所有元素为标准大小，防止布局错乱
+  if (isDragging.value) return { gridColumn: 'span 3' }
+
+  // 1-4个：平分一行
+  if (total === 1) return { gridColumn: 'span 12' }
+  if (total === 2) return { gridColumn: 'span 6' }
+  if (total === 3) return { gridColumn: 'span 4' }
+  if (total === 4) return { gridColumn: 'span 3' }
+
+  const remainder = total % 4
+  
+  // 方案 B：Bento 重点法 (余1)
+  // 第一个元素 2x2 (span 6, span 2 rows)
+  if (remainder === 1) {
+    if (index === 0) {
+      return { gridColumn: 'span 6', gridRow: 'span 2' }
+    }
+    return { gridColumn: 'span 3' }
+  }
+
+  // 余2：第一行2个（中等），后面全部4个
+  if (remainder === 2) {
+    return { gridColumn: index < 2 ? 'span 6' : 'span 3' }
+  }
+
+  // 余3：第一行3个（稍宽），后面全部4个
+  if (remainder === 3) {
+    return { gridColumn: index < 3 ? 'span 4' : 'span 3' }
+  }
+  
+  return { gridColumn: 'span 3' }
+}
+
+const onDragStart = () => {
+  isDragging.value = true
+}
+
+const onDragEnd = async () => {
+  isDragging.value = false
+  // 简单的持久化：将文件夹移动到列表最前面
+  // 注意：这假设用户希望文件夹都在书签前面
+  try {
+    for (let i = 0; i < localFolders.value.length; i++) {
+      const folder = localFolders.value[i]
+      if (folder) {
+        await browser.bookmarks.move(folder.id, { index: i })
+      }
+    }
+    // 刷新数据以确保一致性
+    // refresh() // 暂时不刷新，以免闪烁，本地状态已经更新
+  } catch (e) {
+    console.error('Failed to reorder bookmarks:', e)
+  }
+}
+
+// 初始化拖拽 - 移除 hook 方式，改用组件方式
+// useDraggable(folderGridRef, localFolders, { ... })
+
 const editDialogVisible = ref(false)
 const editMode = ref<'add' | 'edit' | 'addFolder' | 'addChild' | 'addChildFolder'>('add')
 const editingNode = ref<ChromeBookmarkNode | null>(null)
@@ -56,6 +135,14 @@ const editForm = ref({
 const deleteDialogVisible = ref(false)
 const deleteNode = ref<ChromeBookmarkNode | null>(null)
 const panelContainerRef = ref<HTMLElement | null>(null)
+
+// 折叠/展开状态
+const isExpanded = ref(false)
+
+// 监听文件夹变化，重置折叠状态
+watch(currentFolder, () => {
+  isExpanded.value = false
+})
 const folderContextMenu = reactive({
   visible: false,
   x: 0,
@@ -154,10 +241,33 @@ async function ensureDataLoaded() {
 
 async function refresh() {
   loading.value = true
+  
+  // 保存当前文件夹栈的ID路径
+  const currentFolderIds = folderStack.value.map(folder => folder.id)
+  
   const folders = await getBookmarkFolders()
   const bookmarksBar = folders.find((folder) => folder.id === '1')
   bookmarkTree.value = bookmarksBar?.children ?? []
-  folderStack.value = []
+  
+  // 重建文件夹栈
+  if (currentFolderIds.length > 0) {
+    folderStack.value = []
+    let currentNodes = bookmarkTree.value
+    
+    for (const folderId of currentFolderIds) {
+      const folder = currentNodes.find(node => node.id === folderId)
+      if (folder && folder.children) {
+        folderStack.value.push(folder)
+        currentNodes = folder.children
+      } else {
+        // 如果找不到文件夹（可能被删除了），返回到能找到的最后一级
+        break
+      }
+    }
+  } else {
+    folderStack.value = []
+  }
+  
   loading.value = false
   initFuse()
   resetSearch()
@@ -182,7 +292,7 @@ function hidePanel() {
   emit('panel-visibility-change', false)
   folderStack.value = []
   resetSearch()
-  hideFolderContextMenu()
+  hideContextMenu()
 }
 
 async function togglePanel() {
@@ -259,15 +369,17 @@ const shouldShowUrlField = computed(() => {
 })
 
 
+
 function getCurrentParentId(defaultId = '1') {
   return currentFolder.value?.id ?? defaultId
 }
+
 
 function formatBookmarkUrl(url: string) {
   const trimmed = url.trim()
   if (!trimmed) return trimmed
   try {
-    // eslint-disable-next-line no-new
+     
     new URL(trimmed)
     return trimmed
   } catch {
@@ -289,21 +401,7 @@ function showAddFolder() {
   editDialogVisible.value = true
 }
 
-function showAddChildBookmark(parentNode: ChromeBookmarkNode) {
-  editMode.value = 'addChild'
-  editParentId.value = parentNode.id
-  editingNode.value = parentNode
-  editForm.value = { title: '', url: '' }
-  editDialogVisible.value = true
-}
 
-function showAddChildFolder(parentNode: ChromeBookmarkNode) {
-  editMode.value = 'addChildFolder'
-  editParentId.value = parentNode.id
-  editingNode.value = parentNode
-  editForm.value = { title: '', url: '' }
-  editDialogVisible.value = true
-}
 
 function showEditBookmark(node: ChromeBookmarkNode) {
   editMode.value = 'edit'
@@ -336,26 +434,22 @@ async function saveBookmark() {
         title: editForm.value.title,
         url: editForm.value.url
       })
-      ElMessage.success(t('bookmarkMenu.addSuccess'))
     } else if (editMode.value === 'addFolder') {
       await browser.bookmarks.create({
         parentId: editParentId.value,
         title: editForm.value.title
       })
-      ElMessage.success(t('bookmarkMenu.addFolderSuccess'))
     } else if (editMode.value === 'addChild') {
       await browser.bookmarks.create({
         parentId: editParentId.value,
         title: editForm.value.title,
         url: editForm.value.url
       })
-      ElMessage.success(t('bookmarkMenu.addSuccess'))
     } else if (editMode.value === 'addChildFolder') {
       await browser.bookmarks.create({
         parentId: editParentId.value,
         title: editForm.value.title
       })
-      ElMessage.success(t('bookmarkMenu.addFolderSuccess'))
     } else if (editMode.value === 'edit' && editingNode.value) {
       const payload: { title: string; url?: string } = {
         title: editForm.value.title
@@ -364,7 +458,6 @@ async function saveBookmark() {
         payload.url = editForm.value.url || undefined
       }
       await browser.bookmarks.update(editingNode.value.id, payload)
-      ElMessage.success(t('bookmarkMenu.editSuccess'))
     }
 
     editDialogVisible.value = false
@@ -375,33 +468,33 @@ async function saveBookmark() {
   }
 }
 
-function showFolderContextMenu(event: MouseEvent, folder: ChromeBookmarkNode) {
+function showContextMenu(event: MouseEvent, node: ChromeBookmarkNode) {
   event.preventDefault()
   event.stopPropagation()
-  hideFolderContextMenu()
   folderContextMenu.visible = true
-  folderContextMenu.folder = folder
+  folderContextMenu.folder = node
   folderContextMenu.x = event.clientX
   folderContextMenu.y = event.clientY
-  document.addEventListener('click', hideFolderContextMenu)
-  document.addEventListener('contextmenu', hideFolderContextMenu)
+  
+  document.addEventListener('click', hideContextMenu)
+  document.addEventListener('contextmenu', hideContextMenu)
 }
 
-function hideFolderContextMenu() {
+function hideContextMenu() {
   folderContextMenu.visible = false
   folderContextMenu.folder = null
-  document.removeEventListener('click', hideFolderContextMenu)
-  document.removeEventListener('contextmenu', hideFolderContextMenu)
+  document.removeEventListener('click', hideContextMenu)
+  document.removeEventListener('contextmenu', hideContextMenu)
 }
 
-function handleFolderMenuAction(action: 'edit' | 'delete') {
-  const folder = folderContextMenu.folder
-  hideFolderContextMenu()
-  if (!folder) return
+function handleMenuAction(action: 'edit' | 'delete') {
+  const node = folderContextMenu.folder
+  hideContextMenu()
+  if (!node) return
   if (action === 'edit') {
-    showEditBookmark(folder)
+    showEditBookmark(node)
   } else {
-    void deleteBookmark(folder)
+    void deleteBookmark(node)
   }
 }
 
@@ -413,6 +506,8 @@ function showDeleteConfirm(node: ChromeBookmarkNode) {
 async function confirmDelete() {
   if (!deleteNode.value) return
 
+  const isFolder = !deleteNode.value.url
+
   try {
     if (deleteNode.value.children && deleteNode.value.children.length > 0) {
       await browser.bookmarks.removeTree(deleteNode.value.id)
@@ -420,7 +515,6 @@ async function confirmDelete() {
       await browser.bookmarks.remove(deleteNode.value.id)
     }
 
-    ElMessage.success(t('bookmarkMenu.deleteSuccess'))
     deleteDialogVisible.value = false
     deleteNode.value = null
     await refresh()
@@ -464,8 +558,8 @@ watch(
 )
 
 onUnmounted(() => {
-  document.removeEventListener('click', hideFolderContextMenu)
-  document.removeEventListener('contextmenu', hideFolderContextMenu)
+  document.removeEventListener('click', hideContextMenu)
+  document.removeEventListener('contextmenu', hideContextMenu)
   if (typeof document !== 'undefined') {
     document.body.style.overflow = previousBodyOverflow
   }
@@ -489,54 +583,46 @@ defineExpose({
         :style="glassBlurStyle"
         @click.stop
       >
-          <header class="bookmark-panel__header">
-            <button
-              v-if="currentFolder"
-              type="button"
-              class="bookmark-panel__circle-btn"
-              @click="goBack"
-            >
-              <el-icon><arrow-back /></el-icon>
-            </button>
-            <div class="bookmark-panel__title-group">
-              <h3 class="bookmark-panel__title">
-                {{ currentFolder?.title || t('bookmarkMenu.title') }}
-              </h3>
-            </div>
-              <div class="bookmark-panel__actions">
-                <el-tooltip v-if="currentFolder" placement="top">
-                  <template #content>
-                    {{ t('bookmarkMenu.addBookmark') }}
-                  </template>
-                <el-icon
-                  class="bookmark-panel__icon"
-                @click.stop="showAddBookmark"
-              >
-                <add />
-              </el-icon>
-            </el-tooltip>
+        <header class="bookmark-panel__header">
+          <div class="bookmark-panel__actions">
             <el-tooltip placement="top">
               <template #content>
-                {{ t('bookmarkMenu.addFolder') }}
+                {{ currentFolder ? t('bookmarkMenu.goBack') : t('bookmarkMenu.close') }}
               </template>
-              <el-icon
-                  class="bookmark-panel__icon"
-                  @click.stop="showAddFolder"
-                >
-                  <folder />
+              <div class="mac-icon close" @click="currentFolder ? goBack() : hidePanel()">
+                <el-icon>
+                  <arrow-back v-if="currentFolder" />
+                  <close v-else />
                 </el-icon>
-              </el-tooltip>
+              </div>
+            </el-tooltip>
             <el-tooltip placement="top">
               <template #content>
                 {{ t('bookmarkMenu.refresh') }}
               </template>
-                <el-icon class="bookmark-panel__icon" @click.stop="refresh">
+              <div class="mac-icon refresh" @click.stop="refresh">
+                <el-icon>
                   <refresh-icon />
                 </el-icon>
+              </div>
             </el-tooltip>
-            <el-icon class="bookmark-panel__icon" @click="hidePanel">
-              <close />
-            </el-icon>
+            <el-tooltip placement="top">
+              <template #content>
+                {{ currentFolder ? t('bookmarkMenu.addBookmark') : t('bookmarkMenu.addFolder') }}
+              </template>
+              <div class="mac-icon folder" @click.stop="currentFolder ? showAddBookmark() : showAddFolder()">
+                <el-icon>
+                  <add v-if="currentFolder" />
+                  <folder v-else />
+                </el-icon>
+              </div>
+            </el-tooltip>
+          </div>
+
+          <div class="bookmark-panel__title-group">
+            <h3 class="bookmark-panel__title">
+              {{ currentFolder?.title || t('bookmarkMenu.title') }}
+            </h3>
           </div>
         </header>
 
@@ -552,13 +638,14 @@ defineExpose({
           />
         </div>
 
-        <div class="bookmark-panel__body">
-          <div v-if="loading" class="bookmark-panel__loading">
-            <span class="bookmark-panel__loading-spinner"></span>
-            <span>{{ t('common.loading') }}</span>
-          </div>
-          <template v-else>
-            <div v-if="isSearching" class="bookmark-panel__search-results">
+        <div class="bookmark-panel__body" :class="{ 'is-expanded': isExpanded && !isSearching }">
+          <transition name="fade" mode="out-in">
+            <div v-if="loading" class="bookmark-panel__loading">
+              <div class="loading-spinner"></div>
+            </div>
+            
+            <!-- 搜索结果 -->
+            <div v-else-if="isSearching" class="bookmark-panel__search-results">
               <div
                 v-for="(item, index) in searchResults"
                 :key="item.id"
@@ -574,67 +661,73 @@ defineExpose({
               </div>
             </div>
 
-            <transition name="bookmark-panel-slide" mode="out-in">
-              <div v-if="!isSearching" key="panel-content">
-                <div v-if="currentFolder" class="bookmark-panel__tree">
-                  <template v-if="currentItems.length">
-                  <bookmark-tree-item
-                    v-for="node in currentItems"
-                    :key="node.id"
-                    :node="node"
-                    :level="0"
-                    @edit="showEditBookmark"
-                    @delete="deleteBookmark"
-                    @add-child="showAddChildBookmark"
-                    @add-child-folder="showAddChildFolder"
-                  />
-                  </template>
-                  <p v-else class="bookmark-panel__empty">{{ t('bookmarkMenu.folderEmpty') }}</p>
-                </div>
-                <div v-else>
-                  <div v-if="currentFolders.length" class="bookmark-panel__folder-grid">
-                    <button
-                      v-for="folder in currentFolders"
-                      :key="folder.id"
-                      type="button"
-                      class="bookmark-panel__folder-card"
-                      @click="enterFolder(folder)"
-                      @contextmenu="showFolderContextMenu($event, folder)"
-                    >
-                      <div class="bookmark-panel__folder-icon-wrap">
-                        <el-icon class="bookmark-panel__folder-icon">
-                          <folder />
-                        </el-icon>
-                      </div>
-                    <div class="bookmark-panel__folder-info">
-                      <span class="bookmark-panel__folder-name">
-                        {{ folder.title || t('bookmarkMenu.untitledFolder') }}
-                      </span>
+            <!-- 正常内容 -->
+            <div v-else class="bookmark-panel__content">
+              <!-- 文件夹网格 -->
+              <VueDraggable
+                v-if="localFolders.length"
+                v-model="localFolders"
+                class="bookmark-panel__folder-grid"
+                :animation="150"
+                :delay="200"
+                :fallback-tolerance="5"
+                handle=".bookmark-panel__folder-icon-wrap"
+                @start="onDragStart"
+                @end="onDragEnd"
+              >
+                <div
+                  v-for="(folder, index) in localFolders"
+                  :key="folder.id"
+                  role="button"
+                  class="bookmark-panel__folder-card"
+                  :style="getGridStyle(index, localFolders.length)"
+                  @click="enterFolder(folder)"
+                  @contextmenu="showContextMenu($event, folder)"
+                >
+                  <div class="bookmark-panel__folder-icon-wrap">
+                    <Folder class="bookmark-panel__folder-icon" />
+                  </div>
+                  <div class="bookmark-panel__folder-info">
+                    <div class="bookmark-panel__folder-name" :title="folder.title">
+                      {{ folder.title }}
                     </div>
-                  </button>
-                </div>
-                  <p v-else class="bookmark-panel__empty">{{ t('bookmarkMenu.empty') }}</p>
-
-                  <div v-if="currentBookmarks.length" class="bookmark-panel__bookmark-list">
-                    <button
-                      v-for="bookmark in currentBookmarks"
-                      :key="bookmark.id"
-                      type="button"
-                      class="bookmark-panel__bookmark-item"
-                      @click="openBookmark(bookmark.url!)"
-                    >
-                      <span>{{ bookmark.title || bookmark.url }}</span>
-                    </button>
                   </div>
                 </div>
+              </VueDraggable>
+
+              <!-- 书签列表 -->
+              <div v-if="currentBookmarks.length" class="bookmark-panel__bookmark-list">
+                <button
+                  v-for="bookmark in limitedBookmarks"
+                  :key="bookmark.id"
+                  type="button"
+                  class="bookmark-panel__bookmark-item"
+                  :title="bookmark.title || bookmark.url"
+                  @click="openBookmark(bookmark.url!)"
+                  @contextmenu="showContextMenu($event, bookmark)"
+                >
+                  <div class="bookmark-panel__bookmark-info">
+                    <span class="bookmark-panel__bookmark-title">{{ bookmark.title || bookmark.url }}</span>
+                    <span class="bookmark-panel__bookmark-url">{{ bookmark.url }}</span>
+                  </div>
+                </button>
               </div>
-            </transition>
-          </template>
+              
+              <!-- 展开更多按钮 -->
+              <div v-if="hasMoreBookmarks" class="bookmark-panel__expand-btn" @click="isExpanded = true">
+                <span>显示更多 ({{ currentBookmarks.length - 10 }})</span>
+                <el-icon><arrow-down /></el-icon>
+              </div>
+              
+              <p v-if="!currentFolders.length && !currentBookmarks.length" class="bookmark-panel__empty">
+                {{ t('bookmarkMenu.empty') }}
+              </p>
+            </div>
+          </transition>
         </div>
       </section>
     </transition>
   </div>
-
   <el-dialog
     v-model="editDialogVisible"
     :title="editDialogTitle"
@@ -674,8 +767,8 @@ defineExpose({
     <div
       v-if="folderContextMenu.visible"
       class="bookmark-context-backdrop"
-      @click="hideFolderContextMenu"
-      @contextmenu.prevent="hideFolderContextMenu"
+      @click="hideContextMenu"
+      @contextmenu.prevent="hideContextMenu"
     ></div>
     <transition name="context-fade">
       <div
@@ -687,7 +780,7 @@ defineExpose({
         }"
         @click.stop
       >
-        <div class="bookmark-context-menu__item" @click="handleFolderMenuAction('edit')">
+        <div class="bookmark-context-menu__item" @click="handleMenuAction('edit')">
           <el-icon class="bookmark-context-menu__item-icon">
             <edit-icon />
           </el-icon>
@@ -695,7 +788,7 @@ defineExpose({
         </div>
         <div
           class="bookmark-context-menu__item bookmark-context-menu__item--danger"
-          @click="handleFolderMenuAction('delete')"
+          @click="handleMenuAction('delete')"
         >
           <el-icon class="bookmark-context-menu__item-icon">
             <delete-icon />
@@ -709,22 +802,26 @@ defineExpose({
 
 <style scoped lang="scss">
 .bookmark-inline-area {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  align-items: center;
+  justify-content: center;
   width: 100%;
   min-height: 180px;
   margin-top: 24px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  flex-direction: column;
-  gap: 16px;
 }
 
 .bookmark-panel {
+
+  display: flex;
+  flex-direction: column;
   width: min(860px, 100%);
+  max-height: 80vh;
   padding: 20px 28px 28px;
   background: rgb(255 255 255 / 86%);
-  border-radius: 20px;
   border: 1px solid rgb(255 255 255 / 30%);
+  border-radius: 20px;
   box-shadow:
     0 20px 45px rgb(15 23 42 / 15%),
     0 5px 15px rgb(15 23 42 / 8%);
@@ -735,38 +832,38 @@ defineExpose({
     background: rgb(25 25 25 / 88%);
     border-color: rgb(255 255 255 / 10%);
   }
-
-  display: flex;
-  flex-direction: column;
-  max-height: 80vh;
 }
 
 .bookmark-panel__header {
   position: relative;
   display: flex;
+  gap: 16px;
   align-items: center;
   justify-content: center;
-  gap: 16px;
 }
 
 .bookmark-panel__title-group {
   display: flex;
-  align-items: center;
   gap: 12px;
+  align-items: center;
   text-align: center;
 }
 
 .bookmark-panel__circle-btn {
-  width: 40px;
-  height: 40px;
-  border-radius: 50%;
-  border: none;
-  cursor: pointer;
+
+  position: absolute;
+  right: 24px;
+  left: auto;
   display: flex;
   align-items: center;
   justify-content: center;
-  background: var(--el-color-primary-light-9);
+  width: 40px;
+  height: 40px;
   color: var(--el-color-primary);
+  cursor: pointer;
+  background: var(--el-color-primary-light-9);
+  border: none;
+  border-radius: 50%;
   transition: transform 0.2s ease;
 
   &:hover {
@@ -774,55 +871,171 @@ defineExpose({
   }
 
   html.dark & {
-    background: rgb(255 255 255 / 12%);
     color: #fff;
+    background: rgb(255 255 255 / 12%);
   }
-
-  position: absolute;
-  left: 0;
 }
 
 .bookmark-panel__subtitle {
   margin: 0;
-  color: var(--el-text-color-secondary);
   font-size: 13px;
+  color: var(--el-text-color-secondary);
 }
 
 .bookmark-panel__title {
   margin: 4px 0 0;
   font-size: 22px;
+  width: 100%;
+  text-align: center;
 }
 
 .bookmark-panel__actions {
-  display: flex;
-  gap: 12px;
-  align-items: center;
   position: absolute;
-  right: 0;
+  top: 8px;
+  left: 12px;
+  right: auto;
+  display: flex;
+  gap: 6px;
+  align-items: center;
 }
+
+.mac-icon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 12px;
+  height: 12px;
+  font-size: 8px;
+  color: transparent;
+  cursor: pointer;
+  border-radius: 50%;
+  transition: all 0.2s ease;
+
+  &.close {
+    background-color: #ff5f56;
+  }
+
+  &.refresh {
+    background-color: #ffbd2e;
+  }
+
+  &.folder {
+    background-color: #27c93f;
+  }
+
+  &:hover {
+    color: rgb(0 0 0 / 60%);
+    box-shadow: inset 0 0 0 1px rgb(0 0 0 / 10%);
+  }
+
+  .el-icon {
+    width: 100%;
+    height: 100%;
+  }
+}
+
 
 .bookmark-panel__icon {
   font-size: 18px;
-  cursor: pointer;
   color: var(--el-text-color-primary);
+  cursor: pointer;
   transition: transform 0.2s ease;
 
   &:hover {
-    transform: scale(1.1);
     color: var(--el-color-primary);
+    transform: scale(1.1);
   }
 }
 
 .bookmark-panel__search {
   margin-top: 18px;
+
+  :deep(.el-input__wrapper) {
+    justify-content: center;
+  }
+
+  :deep(.el-input__inner) {
+    text-align: center;
+  }
 }
 
 .bookmark-panel__body {
-  margin-top: 18px;
-  min-height: 220px;
   flex: 1;
+  min-height: 200px;
+  margin-top: 18px;
   overflow-y: auto;
-  padding-right: 6px;
+  overflow-x: hidden;
+  
+  /* 默认状态：无遮罩，无高度限制（因为内容少） */
+  
+  /* 展开状态：应用高度限制和遮罩 */
+  &.is-expanded {
+    max-height: 55vh;
+    padding-bottom: 20px;
+    
+    /* 底部渐变遮罩 */
+    mask-image: linear-gradient(to bottom, black calc(100% - 40px), transparent 100%);
+    -webkit-mask-image: linear-gradient(to bottom, black calc(100% - 40px), transparent 100%);
+
+    /* 滚动条样式 */
+    &::-webkit-scrollbar {
+      width: 4px;
+    }
+
+    &::-webkit-scrollbar-track {
+      background: transparent;
+    }
+
+    &::-webkit-scrollbar-thumb {
+      background: transparent;
+      border-radius: 4px;
+      transition: background-color 0.3s ease;
+    }
+
+    &:hover::-webkit-scrollbar-thumb {
+      background: rgb(0 0 0 / 20%);
+
+      &:hover {
+        background: rgb(0 0 0 / 40%);
+      }
+    }
+
+    html.dark & {
+      &:hover::-webkit-scrollbar-thumb {
+        background: rgb(255 255 255 / 20%);
+
+        &:hover {
+          background: rgb(255 255 255 / 40%);
+        }
+      }
+    }
+  }
+}
+
+.bookmark-panel__expand-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  width: 100%;
+  padding: 12px 0;
+  margin-top: 8px;
+  font-size: 13px;
+  color: var(--el-text-color-secondary);
+  cursor: pointer;
+  border-radius: 8px;
+  transition: all 0.2s ease;
+
+  &:hover {
+    color: var(--el-color-primary);
+    background: var(--el-color-primary-light-9);
+  }
+
+  html.dark & {
+    &:hover {
+      background: rgb(255 255 255 / 10%);
+    }
+  }
 }
 
 .bookmark-context-backdrop {
@@ -904,54 +1117,17 @@ defineExpose({
   transform: scale(0.98);
 }
 
-:global(.bookmark-edit-modal) {
-  border-radius: 18px;
-  overflow: hidden;
-  border: 1px solid rgb(255 255 255 / 60%);
-  box-shadow:
-    0 20px 45px rgb(15 23 42 / 20%),
-    0 8px 20px rgb(15 23 42 / 8%);
-
-  .el-dialog__header {
-    padding: 16px 24px;
-    border-bottom: 1px solid rgb(0 0 0 / 6%);
-    justify-content: center;
-  }
-
-  .el-dialog__title {
-    font-weight: 600;
-    font-size: 16px;
-  }
-
-  .el-dialog__body {
-    padding: 24px;
-  }
-
-  .el-dialog__footer {
-    padding: 0 24px 24px;
-  }
-
-  .el-button + .el-button {
-    margin-left: 10px;
-  }
-
-  .el-dialog__footer .el-button {
-    min-width: 72px;
-    border-radius: 999px;
-  }
-}
-
 .bookmark-delete-content {
-  color: var(--el-text-color-regular);
   font-size: 14px;
   line-height: 1.6;
+  color: var(--el-text-color-regular);
 }
 
 .bookmark-panel__loading {
   display: flex;
+  gap: 8px;
   align-items: center;
   justify-content: center;
-  gap: 8px;
   color: var(--el-text-color-secondary);
 }
 
@@ -972,49 +1148,156 @@ defineExpose({
 
 .bookmark-panel__folder-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(170px, 1fr));
+  grid-template-columns: repeat(12, 1fr); /* 12列网格系统 */
+  grid-auto-flow: row dense; /* 关键：允许自动填补空隙 */
   gap: 14px;
+  width: 100%;
 }
 
 .bookmark-panel__folder-card {
-  border-radius: 18px;
-  padding: 24px 12px;
-  border: 1px dashed rgb(255 255 255 / 60%);
-  background: transparent;
   display: flex;
   flex-direction: column;
+  gap: 10px;
   align-items: center;
   justify-content: center;
+  width: 100%; /* 填满网格单元 */
+  min-height: 120px; /* 保证高度一致 */
+  padding: 24px 12px;
   text-align: center;
-  gap: 10px;
   cursor: pointer;
+  user-select: none; /* 防止拖拽时选中文字 */
+  background: rgb(255 255 255 / 40%);
+  border: 1px solid rgb(255 255 255 / 40%);
+  border-radius: 18px;
   transition:
     transform 0.2s ease,
     border 0.2s ease,
-    background 0.2s ease;
+    background 0.2s ease,
+    box-shadow 0.2s ease;
+
+  &.is-wide {
+    /* 废弃，由 gridColumn 动态控制 */
+  }
+
+  /* 当 span 大于 3 (即宽度大于 25%) 时，改为横向布局 */
+  &[style*="span 4"],
+  &[style*="span 6"],
+  &[style*="span 12"] {
+    flex-direction: row;
+    gap: 16px;
+    padding-left: 24px;
+    padding-right: 24px;
+    
+    .bookmark-panel__folder-info {
+      text-align: left;
+      flex: 1;
+    }
+
+    .bookmark-panel__folder-name {
+      font-size: 14px;
+      font-weight: 600;
+    }
+  }
+
+  /* 拖拽时的样式 */
+  &.sortable-ghost {
+    opacity: 0.5;
+    background: rgb(255 255 255 / 20%);
+  }
+
+  &.sortable-drag {
+    cursor: grabbing;
+    background: rgb(255 255 255 / 90%);
+    transform: scale(1.05);
+    box-shadow: 0 12px 32px rgb(0 0 0 / 20%);
+    z-index: 10;
+    
+    /* 拖拽时的文字提示 */
+    &::after {
+      content: "松开排序";
+      position: absolute;
+      bottom: -28px;
+      left: 50%;
+      transform: translateX(-50%);
+      background: rgba(0, 0, 0, 0.7);
+      color: white;
+      padding: 4px 8px;
+      border-radius: 4px;
+      font-size: 12px;
+      white-space: nowrap;
+      pointer-events: none;
+      animation: fadeIn 0.2s ease;
+    }
+  }
+
+  @keyframes fadeIn {
+    from { opacity: 0; transform: translate(-50%, 5px); }
+    to { opacity: 1; transform: translate(-50%, 0); }
+  }
 
   &:hover {
-    transform: translateY(-2px);
+    background: rgb(255 255 255 / 60%);
     border-color: rgb(255 255 255 / 80%);
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgb(0 0 0 / 5%);
   }
 
   html.dark & {
-    border-color: rgb(255 255 255 / 25%);
+    background: rgb(255 255 255 / 5%);
+    border-color: rgb(255 255 255 / 8%);
+
+    .bookmark-panel__folder-name {
+      color: rgb(255 255 255 / 90%); /* 深色模式文字变白 */
+    }
 
     &:hover {
-      border-color: rgb(255 255 255 / 40%);
+      background: rgb(255 255 255 / 10%);
+      border-color: rgb(255 255 255 / 15%);
+      box-shadow: 0 4px 12px rgb(0 0 0 / 20%);
     }
   }
 }
 
 .bookmark-panel__folder-icon-wrap {
-  width: 48px;
-  height: 48px;
-  border-radius: 18px;
-  background: rgb(255 255 255 / 18%);
   display: flex;
   align-items: center;
   justify-content: center;
+  width: 48px;
+  height: 48px;
+  background: rgb(255 255 255 / 50%);
+  border-radius: 14px;
+  color: #f5b800;
+  font-size: 24px;
+  flex-shrink: 0; /* 防止图标被压缩 */
+  cursor: grab; /* 提示可拖拽 */
+  position: relative; /* 为提示文字定位 */
+
+  /* 长按时的提示 */
+  &:active::after {
+    content: "拖拽排序";
+    position: absolute;
+    top: -32px;
+    left: 50%;
+    transform: translateX(-50%);
+    background: rgba(0, 0, 0, 0.7);
+    color: white;
+    padding: 4px 8px;
+    border-radius: 4px;
+    font-size: 12px;
+    white-space: nowrap;
+    pointer-events: none;
+    z-index: 20;
+    animation: fadeIn 0.2s ease;
+  }
+
+  &:active {
+    cursor: grabbing;
+  }
+
+  html.dark & {
+    background: rgb(255 255 255 / 10%);
+    color: #ffd700;
+  }
 }
 
 .bookmark-panel__folder-icon {
@@ -1025,43 +1308,73 @@ defineExpose({
 .bookmark-panel__folder-info {
   display: flex;
   flex-direction: column;
-  gap: 6px;
-  align-items: center;
-  line-height: 1.3;
+  gap: 4px;
+  overflow: hidden;
+  width: 100%;
 }
 
 .bookmark-panel__folder-name {
-  font-weight: 600;
-  font-size: 15px;
+  font-size: 13px;
+  color: var(--el-text-color-primary);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  transition: color 0.2s ease;
 }
 
 .bookmark-panel__bookmark-list {
-  margin-top: 16px;
   display: flex;
-  flex-wrap: wrap;
-  gap: 10px;
+  flex-direction: column;
+  gap: 2px;
+  margin-top: 12px;
 }
 
 .bookmark-panel__bookmark-item {
-  border: none;
-  border-radius: 999px;
-  padding: 8px 16px;
-  background: rgb(0 0 0 / 5%);
+  display: flex;
+  align-items: center;
+  width: 100%;
+  padding: 8px 12px;
   cursor: pointer;
-  color: var(--el-text-color-primary);
-  transition: background 0.2s ease;
+  background: transparent;
+  border: none;
+  border-radius: 8px;
+  transition: all 0.2s ease;
 
   &:hover {
-    background: var(--el-color-primary-light-9);
+    background: rgb(0 0 0 / 4%);
   }
 
   html.dark & {
-    background: rgb(255 255 255 / 10%);
-
     &:hover {
-      background: rgb(255 255 255 / 25%);
+      background: rgb(255 255 255 / 6%);
     }
   }
+}
+
+.bookmark-panel__bookmark-info {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  overflow: hidden;
+  text-align: left;
+}
+
+.bookmark-panel__bookmark-title {
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--el-text-color-primary);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.bookmark-panel__bookmark-url {
+  font-size: 11px;
+  color: var(--el-text-color-secondary);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  opacity: 0.8;
 }
 
 .bookmark-panel__tree {
@@ -1072,8 +1385,8 @@ defineExpose({
 
 .bookmark-panel__empty {
   margin: 32px 0;
-  text-align: center;
   color: var(--el-text-color-secondary);
+  text-align: center;
 }
 
 .bookmark-panel__search-results {
@@ -1084,17 +1397,17 @@ defineExpose({
 
 .bookmark-panel__search-item {
   padding: 10px 14px;
-  border-radius: 12px;
-  background: rgb(0 0 0 / 4%);
   cursor: pointer;
+  background: rgb(0 0 0 / 4%);
+  border-radius: 12px;
   transition:
     transform 0.2s ease,
     background 0.2s ease;
 
   &.active,
   &:hover {
-    transform: translateX(4px);
     background: var(--el-color-primary-light-9);
+    transform: translateX(4px);
   }
 
   html.dark & {
@@ -1107,10 +1420,10 @@ defineExpose({
 }
 
 .bookmark-panel__search-item-url {
-  font-size: 12px;
-  color: var(--el-text-color-secondary);
   overflow: hidden;
   text-overflow: ellipsis;
+  font-size: 12px;
+  color: var(--el-text-color-secondary);
   white-space: nowrap;
 }
 

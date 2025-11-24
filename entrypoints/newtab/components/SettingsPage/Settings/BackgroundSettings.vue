@@ -22,6 +22,7 @@ const settings = useSettingsStore()
 const isChrome = import.meta.env.CHROME || import.meta.env.EDGE
 const tmpUrl = ref('') // 用于在线壁纸输入框的临时存储，避免频繁修改 settingsStore
 const onlineUrlInput = ref<InputInstance>()
+const showOnlineWarning = ref(false)
 
 const predefineMaskColor = ['#f2f3f5', '#000']
 
@@ -141,11 +142,22 @@ function changeOnlineBg(e: Event) {
 
 function onlineImageWarn() {
   if (settings.background.onlineUrl) return
-  ElMessageBox.confirm(t('background.warning.unknownSource'), t('background.warning.title'), {
-    type: 'warning'
-  }).catch(() => {
+  showOnlineWarning.value = true
+}
+
+function cancelOnlineWarning() {
+  showOnlineWarning.value = false
+  if (!settings.background.onlineUrl) {
     settings.background.bgType = BgType.None
-  })
+    tmpUrl.value = ''
+  }
+}
+
+function confirmOnlineWarning() {
+  showOnlineWarning.value = false
+  setTimeout(() => {
+    onlineUrlInput.value?.focus()
+  }, 200)
 }
 
 async function deleteLocalBg(isDark = false) {
@@ -430,6 +442,46 @@ const isVideoBg = computed(
       </span>
     </div>
   </div>
+  <el-dialog
+    v-model="showOnlineWarning"
+    class="online-warning-dialog bookmark-edit-modal"
+    width="520px"
+    :show-close="false"
+    :close-on-click-modal="false"
+    :close-on-press-escape="false"
+    append-to-body
+  >
+    <template #header>
+      <div class="online-warning__header">
+        <div class="online-warning__title">
+          <span class="online-warning__badge">!</span>
+          <span>{{ t('background.warning.title') }}</span>
+        </div>
+        <button class="online-warning__close" type="button" @click="cancelOnlineWarning">
+          <el-icon><CloseRound /></el-icon>
+        </button>
+      </div>
+    </template>
+    <div class="online-warning__body">
+      <div class="online-warning__icon">?</div>
+      <div class="online-warning__content">
+        <p class="online-warning__message">{{ t('background.warning.unknownSource') }}</p>
+        <p class="online-warning__note">
+          {{ t('background.warning.note') }}
+        </p>
+      </div>
+    </div>
+    <template #footer>
+      <div class="online-warning__actions">
+        <el-button round size="large" @click="cancelOnlineWarning">
+          {{ t('background.warning.actions.cancel') }}
+        </el-button>
+        <el-button round size="large" type="warning" @click="confirmOnlineWarning">
+          {{ t('background.warning.actions.continue') }}
+        </el-button>
+      </div>
+    </template>
+  </el-dialog>
 </template>
 
 <style lang="scss" scoped>
@@ -520,6 +572,128 @@ const isVideoBg = computed(
 
   li {
     margin: 3px 0;
+  }
+}
+
+:global(.online-warning-dialog) {
+  width: min(520px, calc(100% - 32px));
+  border-radius: 16px;
+
+  .el-dialog__body {
+    padding: 20px 22px 10px;
+  }
+
+  .el-dialog__footer {
+    padding: 0 22px 22px;
+  }
+}
+
+.online-warning__header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  width: 100%;
+  padding: 16px 22px 14px;
+  border-bottom: 1px solid color-mix(in oklch, var(--el-border-color), transparent 40%);
+}
+
+.online-warning__title {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-size: 16px;
+  font-weight: 700;
+}
+
+.online-warning__badge {
+  display: grid;
+  place-items: center;
+  width: 32px;
+  height: 32px;
+  font-weight: 800;
+  color: #4b1b02;
+  background: linear-gradient(135deg, #f8d465, #f9a73a);
+  border-radius: 10px;
+  box-shadow:
+    0 8px 20px rgb(249 167 58 / 30%),
+    inset 0 0 0 1px rgb(255 255 255 / 50%);
+}
+
+.online-warning__close {
+  display: grid;
+  place-items: center;
+  width: 32px;
+  height: 32px;
+  color: var(--el-text-color-secondary);
+  background: transparent;
+  border: 1px solid color-mix(in oklch, var(--el-border-color), transparent 30%);
+  border-radius: 10px;
+  cursor: pointer;
+  transition:
+    color var(--el-transition-duration-fast) ease,
+    border-color var(--el-transition-duration-fast) ease,
+    transform 0.12s ease;
+
+  &:hover {
+    color: var(--el-color-primary);
+    border-color: var(--el-color-primary);
+    transform: rotate(90deg);
+  }
+
+  &:active {
+    transform: scale(0.96);
+  }
+}
+
+.online-warning__body {
+  display: flex;
+  gap: 14px;
+  align-items: flex-start;
+}
+
+.online-warning__content {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.online-warning__icon {
+  display: grid;
+  place-items: center;
+  flex-shrink: 0;
+  width: 52px;
+  height: 52px;
+  font-size: 24px;
+  font-weight: 700;
+  color: var(--el-color-warning);
+  background: color-mix(in oklch, var(--el-color-warning), transparent 84%);
+  border-radius: 14px;
+  box-shadow: inset 0 0 0 1px color-mix(in oklch, var(--el-color-warning), transparent 70%);
+}
+
+.online-warning__message {
+  margin: 0;
+  font-size: 15px;
+  font-weight: 700;
+  line-height: 1.6;
+  color: var(--el-text-color-primary);
+}
+
+.online-warning__note {
+  margin: 8px 0 0;
+  font-size: 13px;
+  line-height: 1.5;
+  color: var(--el-text-color-secondary);
+}
+
+.online-warning__actions {
+  display: flex;
+  gap: 12px;
+  justify-content: flex-end;
+
+  .el-button {
+    min-width: 92px;
   }
 }
 

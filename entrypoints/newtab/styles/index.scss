@@ -7,6 +7,7 @@
 @use './transitions.scss';
 @use './settings-btn.scss';
 @use './font.scss';
+@use './elegant-dialog.scss';
 
 * {
   box-sizing: border-box;
@@ -55,20 +56,20 @@ html.dialog-acrylic {
 .app {
   display: flex;
   flex-direction: column;
-  align-items: center;
-  height: 100%;
-  justify-content: flex-start;
-  padding-top: clamp(24px, 6vh, 64px);
   gap: clamp(16px, 4vh, 32px);
+  align-items: center;
+  justify-content: flex-start;
+  height: 100%;
+  padding-top: clamp(24px, 6vh, 64px);
 }
 
 .app__hero {
   display: flex;
   flex-direction: column;
+  gap: 14px;
   align-items: center;
   justify-content: center;
   width: 100%;
-  gap: 14px;
 }
 
 .noselect {

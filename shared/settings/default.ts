@@ -1,4 +1,4 @@
-import i18next from 'i18next'
+
 
 import { type CURRENT_CONFIG_INTERFACE, CURRENT_CONFIG_VERSION } from './current'
 import { BgType } from './types'
