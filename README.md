@@ -74,7 +74,6 @@
   <img src="preview/1.webp" width="400" alt="预览图1">
   <img src="preview/2.webp" width="400" alt="预览图2">
   <img src="preview/3.webp" width="400" alt="预览图3">
-  <img src="preview/4.webp" width="400" alt="预览图4">
 </div>
 
 ## 安装使用
