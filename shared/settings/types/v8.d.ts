@@ -72,7 +72,7 @@ export interface SettingsInterfaceVer8 {
   }
   bookmarkMenu: {
     enable: boolean
-    bookmarkViewMode: 'waterfall' | 'grid'
+
     bookmarkGlassBlur: number
   }
   sync: {

@@ -16,6 +16,8 @@ import { VueDraggable } from 'vue-draggable-plus'
 
 import { getBookmarkFolders, type ChromeBookmarkNode } from '@/shared/chromeBookmarks'
 import { useSettingsStore } from '@/shared/settings'
+import { visitTracker, type VisitRecord } from '@newtab/scripts/visitTracker'
+import TopSites from './components/TopSites.vue'
 
 
 
@@ -59,6 +61,7 @@ const hasMoreBookmarks = computed(() => {
 
 const localFolders = ref<ChromeBookmarkNode[]>([])
 const isDragging = ref(false)
+const topSites = ref<VisitRecord[]>([])
 
 watch(currentFolders, (newVal) => {
   localFolders.value = [...newVal]
@@ -237,6 +240,11 @@ async function ensureDataLoaded() {
   bookmarkTree.value = bookmarksBar?.children ?? []
   loading.value = false
   initFuse()
+  loadTopSites()
+}
+
+function loadTopSites() {
+  topSites.value = visitTracker.getTopSites(8)
 }
 
 async function refresh() {
@@ -321,10 +329,26 @@ function goBack() {
   }
 }
 
-function openBookmark(url: string) {
-  if (url) {
-    window.open(url, '_blank')
+function openBookmark(node: ChromeBookmarkNode) {
+  if (node.url) {
+    // Record visit
+    visitTracker.recordVisit(node.url, node.title || '', node.url)
+    loadTopSites() // Refresh top sites
+    
+    window.open(node.url, '_blank')
   }
+}
+
+function handleTopSiteClick(site: VisitRecord) {
+  visitTracker.recordVisit(site.url, site.title, site.favicon)
+  loadTopSites()
+  window.open(site.url, '_blank')
+}
+
+function handleHideTopSite(url: string) {
+  visitTracker.hideSite(url)
+  loadTopSites()
+  ElMessage.success('已隐藏该网站')
 }
 
 function isEventInsideBookmarkUI(target: EventTarget | null) {
@@ -651,7 +675,7 @@ defineExpose({
                 :key="item.id"
                 class="bookmark-panel__search-item"
                 :class="{ active: index === selectedIndex }"
-                @click="openBookmark(item.url!)"
+                @click="openBookmark(item)"
               >
                 <div class="bookmark-panel__search-item-title">{{ item.title }}</div>
                 <div class="bookmark-panel__search-item-url">{{ item.url }}</div>
@@ -663,6 +687,13 @@ defineExpose({
 
             <!-- 正常内容 -->
             <div v-else class="bookmark-panel__content">
+              <!-- Top Sites Section -->
+              <top-sites
+                :sites="topSites"
+                @click="handleTopSiteClick"
+                @hide="handleHideTopSite"
+              />
+              
               <!-- 文件夹网格 -->
               <VueDraggable
                 v-if="localFolders.length"
@@ -703,7 +734,7 @@ defineExpose({
                   type="button"
                   class="bookmark-panel__bookmark-item"
                   :title="bookmark.title || bookmark.url"
-                  @click="openBookmark(bookmark.url!)"
+                  @click="openBookmark(bookmark)"
                   @contextmenu="showContextMenu($event, bookmark)"
                 >
                   <div class="bookmark-panel__bookmark-info">
@@ -819,12 +850,13 @@ defineExpose({
   width: min(860px, 100%);
   max-height: 80vh;
   padding: 20px 28px 28px;
-  background: rgb(255 255 255 / 86%);
-  border: 1px solid rgb(255 255 255 / 30%);
+  background: rgba(255, 255, 255, 0.85);
+  border: 1px solid rgba(255, 255, 255, 0.2);
   border-radius: 20px;
   box-shadow:
-    0 20px 45px rgb(15 23 42 / 15%),
-    0 5px 15px rgb(15 23 42 / 8%);
+    0 0 0 1px rgba(0, 0, 0, 0.05),
+    0 8px 24px rgba(0, 0, 0, 0.12),
+    0 4px 8px rgba(0, 0, 0, 0.08);
   -webkit-backdrop-filter: blur(var(--bookmark-glass-blur, 20px)) saturate(180%);
   backdrop-filter: blur(var(--bookmark-glass-blur, 20px)) saturate(180%);
 
@@ -1047,20 +1079,24 @@ defineExpose({
 .bookmark-context-menu {
   position: fixed;
   z-index: 10000;
-  min-width: 150px;
+  min-width: 160px;
+  padding: 5px;
   overflow: hidden;
-  background: rgb(255 255 255 / 95%);
-  border: 1px solid rgb(0 0 0 / 10%);
-  border-radius: 8px;
+  background: rgba(255, 255, 255, 0.8);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  border-radius: 12px;
   box-shadow:
-    0 4px 16px 0 rgb(0 0 0 / 10%),
-    0 2px 4px -1px rgb(0 0 0 / 6%);
-  -webkit-backdrop-filter: blur(10px);
-  backdrop-filter: blur(10px);
+    0 0 0 1px rgba(0, 0, 0, 0.05),
+    0 12px 32px rgba(0, 0, 0, 0.15);
+  -webkit-backdrop-filter: blur(20px) saturate(180%);
+  backdrop-filter: blur(20px) saturate(180%);
 
   html.dark & {
-    background: rgb(40 40 40 / 95%);
-    border-color: rgb(255 255 255 / 10%);
+    background: rgba(40, 40, 40, 0.8);
+    border-color: rgba(255, 255, 255, 0.1);
+    box-shadow:
+      0 0 0 1px rgba(255, 255, 255, 0.05),
+      0 12px 32px rgba(0, 0, 0, 0.3);
   }
 }
 
@@ -1068,17 +1104,21 @@ defineExpose({
   display: flex;
   gap: 10px;
   align-items: center;
-  padding: 10px 16px;
-  font-size: 14px;
+  padding: 8px 12px;
+  margin: 2px 0;
+  font-size: 13px;
+  font-weight: 500;
   color: var(--el-text-color-primary);
   cursor: pointer;
-  transition: all 0.2s;
+  border-radius: 6px;
+  transition: all 0.15s cubic-bezier(0.25, 1, 0.5, 1);
 
   &:hover {
-    background-color: rgb(0 0 0 / 5%);
+    background-color: var(--el-color-primary);
+    color: white;
 
     html.dark & {
-      background-color: rgb(255 255 255 / 5%);
+      background-color: var(--el-color-primary);
     }
   }
 
@@ -1429,12 +1469,15 @@ defineExpose({
 
 .bookmark-panel-fade-enter-active,
 .bookmark-panel-fade-leave-active {
-  transition: opacity 0.25s ease;
+  transition:
+    opacity 0.2s ease,
+    transform 0.2s ease;
 }
 
 .bookmark-panel-fade-enter-from,
 .bookmark-panel-fade-leave-to {
   opacity: 0;
+  transform: translateY(-10px);
 }
 
 .bookmark-panel-slide-enter-active,

@@ -94,7 +94,7 @@
     "searchEngineNotFound": "未找到搜索引擎",
     "searchEngineMenu": {
       "current": "当前",
-      "tipPrefix": "Tip：按下",
+      "tipPrefix": "Tips：按下",
       "tipSuffix": "切换搜索引擎"
     }
   },

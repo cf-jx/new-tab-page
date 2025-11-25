@@ -92,9 +92,7 @@
     "syncWarning": "云同步不能同步以下内容：本地或在线背景图片、最常访问网站（含已忽略的网站）、深色模式及跟随系统状态等。 不支持同步的项目后面会有如右侧的标识：\n",
     "title": "其他",
     "want_to_customize_chrome": "要自定义Chrome？",
-    "bookmarkViewMode": "书签视图模式",
-    "bookmarkViewModeWaterfall": "瀑布流",
-    "bookmarkViewModeTree": "树形",
+
     "bookmarkGlassBlur": "书签玻璃模糊"
   },
   "perf": {
@@ -115,6 +113,10 @@
       "enable": "一键启用所有",
       "transparent": "透明效果"
     }
+  },
+  "plugins": {
+    "notes": "便签",
+    "notesPlaceholder": "单击输入便签内容"
   },
   "search": {
     "alwaysExpandSearchBar": "一直展开搜索框",

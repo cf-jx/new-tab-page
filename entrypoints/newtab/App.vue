@@ -1,6 +1,6 @@
 <script lang="ts" setup>
 import { defineAsyncComponent, onBeforeMount, onMounted, provide, ref, watch } from 'vue'
-import { promiseTimeout, useColorMode, useDark, usePreferredDark } from '@vueuse/core'
+import { promiseTimeout, useColorMode, useDark, useEventListener, usePreferredDark } from '@vueuse/core'
 
 import type { Language } from 'element-plus/es/locale'
 import { useTranslation } from 'i18next-vue'
@@ -21,6 +21,8 @@ import type SponsorComponent from '@newtab/components/Sponsor.vue'
 
 import type SearchEnginesSwitcherComponent from '@newtab/components/SearchEnginesSwitcher/index.vue'
 import BookmarkMenu from '@newtab/components/BookmarkMenu/index.vue'
+import NotesPlugin from '@newtab/components/Plugins/Notes/index.vue'
+import WallpaperSwitcher from '@newtab/components/Plugins/WallpaperSwitcher/index.vue'
 import { getBingWallpaperURL } from '@newtab/scripts/api/bingWallpaper'
 import { useBgSwitchStore } from '@newtab/scripts/store'
 
@@ -83,6 +85,25 @@ const isDark = useDark()
 const switchStore = useBgSwitchStore()
 const bgURL = ref('')
 const settingsBtnVisible = ref(false)
+const isZenMode = ref(false)
+
+function handleGlobalDblClick(e: MouseEvent) {
+  const target = e.target as HTMLElement
+  // Ignore clicks inside interactive areas
+  if (
+    target.closest('.app__hero') || 
+    target.closest('.bookmark-inline-area') || 
+    target.closest('.settings-btn') || 
+    target.closest('.notes-widget') ||
+    target.closest('.el-overlay') ||
+    target.closest('.search-engines-switcher')
+  ) {
+    return
+  }
+  isZenMode.value = !isZenMode.value
+}
+
+useEventListener(window, 'dblclick', handleGlobalDblClick)
 
 function handleBookmarkPanelVisibility(visible: boolean) {
   settingsBtnVisible.value = visible
@@ -90,7 +111,14 @@ function handleBookmarkPanelVisibility(visible: boolean) {
 
 const bgTypeProviders: Record<BgType, { getURL: () => Promise<string>; verify?: () => Promise<boolean> }> = {
   [BgType.Bing]: {
-    getURL: async () => await getBingWallpaperURL()
+    getURL: async () => {
+      try {
+        return await getBingWallpaperURL()
+      } catch {
+        // Return empty string on failure to allow UI to continue loading
+        return ''
+      }
+    }
   },
   [BgType.Local]: {
     getURL: async () =>
@@ -306,7 +334,7 @@ provide(OPEN_SEARCH_ENGINE_PREFERENCE, () => SESwitcherRef.value?.show())
       placement: 'bottom'
     }"
   >
-    <main class="app">
+    <main class="app" :class="{ 'zen-mode': isZenMode }">
       <div
         class="app__hero"
         v-if="settings.time.enabled || settings.search.enabled"
@@ -315,10 +343,12 @@ provide(OPEN_SEARCH_ENGINE_PREFERENCE, () => SESwitcherRef.value?.show())
         <search-box v-if="settings.search.enabled" />
       </div>
       <bookmark-menu @panel-visibility-change="handleBookmarkPanelVisibility" />
+      <notes-plugin />
     </main>
+    <wallpaper-switcher />
     <background :url="bgURL" />
     <settings-btn
-      v-if="settingsBtnVisible"
+      v-if="settingsBtnVisible && !isZenMode"
       @open-settings="SettingsPageRef?.toggle"
       @open-about="AboutRef?.toggle"
       @open-search-engine-preference="SESwitcherRef?.show"
@@ -332,3 +362,19 @@ provide(OPEN_SEARCH_ENGINE_PREFERENCE, () => SESwitcherRef.value?.show())
     <sponsor ref="SponsorRef" />
   </el-config-provider>
 </template>
+
+<style lang="scss" scoped>
+.app {
+  transition: opacity 0.5s ease;
+  
+  &.zen-mode {
+    .app__hero,
+    .bookmark-inline-area,
+    .notes-container {
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity 0.5s ease;
+    }
+  }
+}
+</style>

@@ -347,25 +347,7 @@ function changeLanguage(lang: string) {
         </el-option>
       </el-select>
     </div>
-    <div class="settings__item settings__item--horizontal">
-      <div class="settings__label">{{ t('other.bookmarkViewMode') }}</div>
-      <el-select
-        v-model="settings.bookmarkMenu.bookmarkViewMode"
-        style="width: 183px"
-        popper-class="settings-item-popper"
-        :show-arrow="false"
-        fit-input-width
-      >
-        <el-option
-          :label="t('other.bookmarkViewModeWaterfall')"
-          value="waterfall"
-        />
-        <el-option
-          :label="t('other.bookmarkViewModeTree')"
-          value="tree"
-        />
-      </el-select>
-    </div>
+
     <div class="settings__item settings__item--horizontal">
       <div class="settings__label">{{ t('other.bookmarkGlassBlur') }}</div>
       <el-slider

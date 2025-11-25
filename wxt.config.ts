@@ -20,13 +20,7 @@ const baseManifest = {
   icons: {
     512: '/icon.png'
   },
-  host_permissions: [
-    'https://www.bing.com/',
-    'https://api.bing.com/',
-    'https://suggestion.baidu.com/',
-    'https://suggestqueries.google.com/',
-    'https://v2.jinrishici.com/'
-  ],
+  host_permissions: ['*://*.bing.com/*', '*://api.open-meteo.com/*'],
   content_security_policy: {
     extension_pages: "script-src 'self'; object-src 'none'; img-src 'self' https: http: data: blob:"
   }

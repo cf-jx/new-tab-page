@@ -95,11 +95,13 @@ defineExpose({
   <el-main class="settings-main noselect">
     <el-scrollbar class="settings-content">
       <h2 ref="titleRef" class="settings-content__title">{{ title }}</h2>
-      <Transition :name="disableTransition ? undefined : 'settings-fade'" mode="out-in">
-        <KeepAlive>
-          <component v-if="activeView" :is="activeView" :key="currentRoute" />
-        </KeepAlive>
-      </Transition>
+      <div class="settings-view-container">
+        <Transition :name="disableTransition ? undefined : 'settings-fade'">
+          <KeepAlive>
+            <component v-if="activeView" :is="activeView" :key="currentRoute" />
+          </KeepAlive>
+        </Transition>
+      </div>
     </el-scrollbar>
   </el-main>
 </template>

@@ -234,29 +234,47 @@
     --el-menu-active-color: var(--el-color-primary);
     --el-menu-hover-bg-color: var(--le-fill-color-dark-opacity-20);
     position: relative;
+    margin: 4px 10px;
+    border-radius: 6px;
     transition:
-      border-color var(--el-transition-duration-fast),
-      background-color var(--el-transition-duration-fast),
-      color var(--el-transition-duration-fast);
+      background-color 0.2s cubic-bezier(0.25, 1, 0.5, 1),
+      color 0.2s cubic-bezier(0.25, 1, 0.5, 1);
 
     .is-mobile & {
       --el-menu-base-level-padding: 30px;
+      margin: 0;
+      border-radius: 0;
     }
 
-    &.is-active,
-    html.colorful &:hover {
+    &.is-active {
+      font-weight: 500;
       background-color: var(--el-color-primary-light-9);
+    }
+
+    html.colorful &.is-active {
+      background-color: var(--el-color-primary-light-8);
+    }
+
+    &:not(.is-active):hover {
+      background-color: var(--el-fill-color-light);
     }
 
     .menu-chevron {
       position: absolute;
-      right: 20px;
+      right: 12px;
+      font-size: 12px;
       color: var(--el-text-color-secondary);
-      transition: color var(--el-transition-duration-fast) ease;
+      opacity: 0;
+      transition:
+        opacity 0.2s ease,
+        transform 0.2s ease;
+      transform: translateX(-5px);
     }
 
-    &:not(.is-active):hover .menu-chevron {
-      color: var(--el-menu-text-color);
+    &:hover .menu-chevron,
+    &.is-active .menu-chevron {
+      opacity: 1;
+      transform: translateX(0);
     }
   }
 
@@ -295,15 +313,32 @@
   }
 }
 
+.settings-view-container {
+  position: relative;
+}
+
 .settings-fade {
   &-enter-active,
   &-leave-active {
-    transition: opacity 0.15s ease;
+    transition:
+      opacity 0.25s cubic-bezier(0.2, 0, 0, 1),
+      transform 0.25s cubic-bezier(0.2, 0, 0, 1);
   }
 
-  &-enter-from,
+  &-enter-from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+
   &-leave-to {
     opacity: 0;
+  }
+
+  &-leave-active {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
   }
 }
 

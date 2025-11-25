@@ -73,7 +73,7 @@ export const defaultSettings: CURRENT_CONFIG_INTERFACE = {
   },
   bookmarkMenu: {
     enable: true,
-    bookmarkViewMode: 'waterfall',
+
     bookmarkGlassBlur: 20
   },
   sync: {

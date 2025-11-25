@@ -5,7 +5,7 @@
  *  - 工具类：      .u-acrylic, .u-acrylic--light, .u-acrylic--strong
  */
 
-@mixin acrylic($blur: 10px, $saturate: 1.4, $brightness: 1.1) {
+@mixin acrylic($blur: 20px, $saturate: 1.8, $brightness: 1.05) {
   backdrop-filter: blur($blur) saturate($saturate) brightness($brightness);
 }
 
