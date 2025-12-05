@@ -8,7 +8,8 @@ import {
   migrateFromVer4To5,
   migrateFromVer5To6,
   migrateFromVer6To7,
-  migrateFromVer7To8
+  migrateFromVer7To8,
+  migrateFromVer8To9
 } from './migrate'
 import type {
   SettingsInterfaceVer2,
@@ -17,7 +18,8 @@ import type {
   SettingsInterfaceVer5,
   SettingsInterfaceVer6,
   SettingsInterfaceVer7,
-  SettingsInterfaceVer8
+  SettingsInterfaceVer8,
+  SettingsInterfaceVer9
 } from './types'
 
 // 合并重复的迁移逻辑，通过辅助函数创建迁移函数
@@ -46,6 +48,7 @@ export const settingsStorage = storage.defineItem<CURRENT_CONFIG_INTERFACE>('loc
     4: createMigration<SettingsInterfaceVer4, SettingsInterfaceVer5>(4, migrateFromVer4To5),
     5: createMigration<SettingsInterfaceVer5, SettingsInterfaceVer6>(5, migrateFromVer5To6),
     6: createMigration<SettingsInterfaceVer6, SettingsInterfaceVer7>(6, migrateFromVer6To7),
-    7: createMigration<SettingsInterfaceVer7, SettingsInterfaceVer8>(7, migrateFromVer7To8)
+    7: createMigration<SettingsInterfaceVer7, SettingsInterfaceVer8>(7, migrateFromVer7To8),
+    8: createMigration<SettingsInterfaceVer8, SettingsInterfaceVer9>(8, migrateFromVer8To9)
   }
 })

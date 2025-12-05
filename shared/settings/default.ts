@@ -18,6 +18,13 @@ export const defaultSettings: CURRENT_CONFIG_INTERFACE = {
     invertColor: {
       light: false,
       night: false
+    },
+    weather: {
+      enabled: true,
+      useManualLocation: false,
+      manualLatitude: 0,
+      manualLongitude: 0,
+      cityName: ''
     }
   },
   search: {

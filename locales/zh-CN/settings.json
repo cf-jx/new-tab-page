@@ -51,7 +51,27 @@
     "showLunar": "显示农历",
     "smallFont": "时间小号字体",
     "title": "时钟",
-    "use12HourClock": "使用 12 小时制"
+    "use12HourClock": "使用 12 小时制",
+    "weather": {
+      "title": "天气设置",
+      "enable": "显示天气",
+      "useManualLocation": "手动设置位置",
+      "useManualLocationTip": "开启后使用手动设置的经纬度，关闭则自动获取位置",
+      "cityName": "城市名称",
+      "cityNamePlaceholder": "如：北京",
+      "latitude": "纬度",
+      "longitude": "经度",
+      "coordsTip": "可以通过地图软件获取经纬度，如高德地图坐标拾取器",
+      "searchCity": "搜索城市",
+      "searchCityPlaceholder": "输入城市名称搜索...",
+      "search": "搜索",
+      "pleaseEnterCity": "请输入城市名称",
+      "cityFound": "已设置位置为 {{city}}",
+      "cityNotFound": "未找到该城市，请尝试其他名称",
+      "searchFailed": "搜索失败，请检查网络",
+      "currentLocation": "当前位置",
+      "advancedSettings": "高级设置（手动输入经纬度）"
+    }
   },
   "other": {
     "confirmPurgeData": {

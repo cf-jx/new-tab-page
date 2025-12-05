@@ -9,12 +9,13 @@ import Search from '@vicons/material/es/SearchRound'
 import EditIcon from '@vicons/material/es/EditRound'
 import DeleteIcon from '@vicons/material/es/DeleteRound'
 import ArrowDown from '@vicons/material/es/KeyboardArrowDownRound'
+import Document from '@vicons/material/es/DescriptionRound'
 import { useTranslation } from 'i18next-vue'
 import { browser } from 'wxt/browser'
 import Fuse from 'fuse.js'
 import { VueDraggable } from 'vue-draggable-plus'
 
-import { getBookmarkFolders, type ChromeBookmarkNode } from '@/shared/chromeBookmarks'
+import { getBookmarkFolders, getNodeFavicon, type ChromeBookmarkNode } from '@/shared/chromeBookmarks'
 import { useSettingsStore } from '@/shared/settings'
 import { visitTracker, type VisitRecord } from '@newtab/scripts/visitTracker'
 import TopSites from './components/TopSites.vue'
@@ -411,6 +412,18 @@ function formatBookmarkUrl(url: string) {
   }
 }
 
+/**
+ * 从 URL 提取域名用于显示
+ */
+function getUrlDomain(url: string): string {
+  try {
+    const urlObj = new URL(url)
+    return urlObj.hostname.replace(/^www\./, '')
+  } catch {
+    return url
+  }
+}
+
 function showAddBookmark() {
   editMode.value = 'add'
   editParentId.value = getCurrentParentId()
@@ -733,13 +746,22 @@ defineExpose({
                   :key="bookmark.id"
                   type="button"
                   class="bookmark-panel__bookmark-item"
-                  :title="bookmark.title || bookmark.url"
+                  :title="`${bookmark.title}\n${bookmark.url}`"
                   @click="openBookmark(bookmark)"
                   @contextmenu="showContextMenu($event, bookmark)"
                 >
+                  <img
+                    v-if="getNodeFavicon(bookmark)"
+                    :src="getNodeFavicon(bookmark)"
+                    class="bookmark-panel__bookmark-favicon"
+                    alt=""
+                  />
+                  <div v-else class="bookmark-panel__bookmark-favicon-placeholder">
+                    <el-icon><Document /></el-icon>
+                  </div>
                   <div class="bookmark-panel__bookmark-info">
-                    <span class="bookmark-panel__bookmark-title">{{ bookmark.title || bookmark.url }}</span>
-                    <span class="bookmark-panel__bookmark-url">{{ bookmark.url }}</span>
+                    <span class="bookmark-panel__bookmark-title">{{ bookmark.title || getUrlDomain(bookmark.url || '') }}</span>
+                    <span class="bookmark-panel__bookmark-url">{{ getUrlDomain(bookmark.url || '') }}</span>
                   </div>
                 </button>
               </div>
@@ -1365,30 +1387,81 @@ defineExpose({
 .bookmark-panel__bookmark-list {
   display: flex;
   flex-direction: column;
-  gap: 2px;
+  gap: 1px;
   margin-top: 12px;
+  max-height: 280px;
+  overflow-y: auto;
+  padding-right: 4px;
+
+  /* 滚动条样式 */
+  &::-webkit-scrollbar {
+    width: 4px;
+  }
+
+  &::-webkit-scrollbar-track {
+    background: transparent;
+  }
+
+  &::-webkit-scrollbar-thumb {
+    background: rgb(0 0 0 / 10%);
+    border-radius: 4px;
+
+    &:hover {
+      background: rgb(0 0 0 / 20%);
+    }
+  }
+
+  html.dark & {
+    &::-webkit-scrollbar-thumb {
+      background: rgb(255 255 255 / 15%);
+
+      &:hover {
+        background: rgb(255 255 255 / 25%);
+      }
+    }
+  }
 }
 
 .bookmark-panel__bookmark-item {
   display: flex;
+  gap: 10px;
   align-items: center;
   width: 100%;
-  padding: 8px 12px;
+  padding: 8px 10px;
   cursor: pointer;
   background: transparent;
   border: none;
   border-radius: 8px;
-  transition: all 0.2s ease;
+  transition: all 0.15s ease;
 
   &:hover {
-    background: rgb(0 0 0 / 4%);
+    background: rgb(0 0 0 / 5%);
   }
 
   html.dark & {
     &:hover {
-      background: rgb(255 255 255 / 6%);
+      background: rgb(255 255 255 / 8%);
     }
   }
+}
+
+.bookmark-panel__bookmark-favicon {
+  width: 16px;
+  height: 16px;
+  flex-shrink: 0;
+  border-radius: 4px;
+  object-fit: contain;
+}
+
+.bookmark-panel__bookmark-favicon-placeholder {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 16px;
+  height: 16px;
+  flex-shrink: 0;
+  color: var(--el-text-color-secondary);
+  font-size: 14px;
 }
 
 .bookmark-panel__bookmark-info {

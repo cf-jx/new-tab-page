@@ -22,7 +22,6 @@ import type SponsorComponent from '@newtab/components/Sponsor.vue'
 import type SearchEnginesSwitcherComponent from '@newtab/components/SearchEnginesSwitcher/index.vue'
 import BookmarkMenu from '@newtab/components/BookmarkMenu/index.vue'
 import NotesPlugin from '@newtab/components/Plugins/Notes/index.vue'
-import WallpaperSwitcher from '@newtab/components/Plugins/WallpaperSwitcher/index.vue'
 import { getBingWallpaperURL } from '@newtab/scripts/api/bingWallpaper'
 import { useBgSwitchStore } from '@newtab/scripts/store'
 
@@ -345,7 +344,7 @@ provide(OPEN_SEARCH_ENGINE_PREFERENCE, () => SESwitcherRef.value?.show())
       <bookmark-menu @panel-visibility-change="handleBookmarkPanelVisibility" />
       <notes-plugin />
     </main>
-    <wallpaper-switcher />
+    <!-- <wallpaper-switcher /> -->
     <background :url="bgURL" />
     <settings-btn
       v-if="settingsBtnVisible && !isZenMode"

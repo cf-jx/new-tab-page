@@ -1,4 +1,3 @@
-import i18next from 'i18next'
 
 import { isImageFile, verifyImageUrl } from '@/shared/media'
 import enhancedFetch from '@/shared/network/fetch'
@@ -52,14 +51,24 @@ export async function getBingWallpaperURL() {
     await useBingWallpaperStore.removeItem(id)
   }
 
-  ElMessage.info(i18next.t('newtab:notification.bingWallpaper.get'))
+  // 移除正在获取的提示，减少打扰
+  // ElMessage.info(i18next.t('newtab:notification.bingWallpaper.get'))
+  
   try {
-    const data: BingWallpaperResp = await enhancedFetch(
-      'https://www.bing.com/HPImageArchive.aspx?format=js&idx=0&n=1'
-      // &mkt=zh-CN 加上区域后会导致后续访问 www.bing.com 被跳转到 cn.bing.com
-    )
+    let imgUrl = ''
+    
+    try {
+      // 尝试官方源
+      const data: BingWallpaperResp = await enhancedFetch(
+        'https://www.bing.com/HPImageArchive.aspx?format=js&idx=0&n=1'
+      )
+      imgUrl = `https://www.bing.com${data.images[0]!.url}`
+    } catch (e) {
+      console.warn('Bing official API failed, trying mirror...', e)
+      // 备用源：直接获取图片
+      imgUrl = 'https://bing.biturl.top/?resolution=1920&format=image&index=0&mkt=zh-CN'
+    }
 
-    const imgUrl = `https://www.bing.com${data.images[0]!.url}`
     const response = await fetch(imgUrl)
     if (!response.ok) {
       return imgUrl
@@ -88,11 +97,12 @@ export async function getBingWallpaperURL() {
     return url
   } catch (error) {
     console.error('Failed to get Bing wallpaper:', error)
-    ElNotification({
-      title: i18next.t('newtab:notification.bingWallpaper.error.title'),
-      message: i18next.t('newtab:notification.bingWallpaper.error.message'),
-      type: 'error'
-    })
+    // 移除错误弹窗，避免每次打开都报错
+    // ElNotification({
+    //   title: i18next.t('newtab:notification.bingWallpaper.error.title'),
+    //   message: i18next.t('newtab:notification.bingWallpaper.error.message'),
+    //   type: 'error'
+    // })
     throw error
   }
 }

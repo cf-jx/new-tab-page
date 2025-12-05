@@ -48,8 +48,15 @@ const formattedTime = computed(() => {
 })
 
 // --- Weather Logic ---
-const { coords } = useGeolocation()
+const { coords } = useGeolocation({
+  enableHighAccuracy: true,
+  timeout: 10000,
+  maximumAge: 0
+})
 const weather = ref<{ temp: number; code: number } | null>(null)
+const weatherLoading = ref(false)
+const weatherRetryCount = ref(0)
+const maxRetries = 3
 
 const weatherIcons: Record<number, string> = {
   0: '☀️', 1: '🌤️', 2: '⛅', 3: '☁️',
@@ -61,12 +68,77 @@ const weatherIcons: Record<number, string> = {
   95: '⛈️', 96: '⛈️', 99: '⛈️'
 }
 
-async function fetchWeather() {
-  if (!coords.value.latitude || !coords.value.longitude) return
+// 获取有效的经纬度（优先使用手动设置）
+function getEffectiveCoords(): { latitude: number; longitude: number } | null {
+  const weatherSettings = settings.time.weather
   
+  // 如果使用手动位置且已设置有效坐标
+  if (weatherSettings.useManualLocation) {
+    if (weatherSettings.manualLatitude && weatherSettings.manualLongitude) {
+      return {
+        latitude: weatherSettings.manualLatitude,
+        longitude: weatherSettings.manualLongitude
+      }
+    }
+    // 手动模式但未设置坐标，返回 null
+    return null
+  }
+  
+  // 使用自动定位
+  if (coords.value.latitude && coords.value.longitude) {
+    return {
+      latitude: coords.value.latitude,
+      longitude: coords.value.longitude
+    }
+  }
+  
+  return null
+}
+
+async function fetchWeather() {
+  // 检查天气是否启用
+  if (!settings.time.weather.enabled) {
+    weather.value = null
+    return
+  }
+  
+  const effectiveCoords = getEffectiveCoords()
+  
+  if (!effectiveCoords) {
+    // 如果没有地理位置，尝试重试
+    if (weatherRetryCount.value < maxRetries) {
+      weatherRetryCount.value++
+      setTimeout(fetchWeather, 5000)
+    }
+    return
+  }
+  
+  weatherLoading.value = true
+  weatherRetryCount.value = 0
+  
+  // 检查坐标有效性
+  if (
+    !Number.isFinite(effectiveCoords.latitude) || 
+    !Number.isFinite(effectiveCoords.longitude)
+  ) {
+    console.warn('[Weather Debug] Invalid coordinates:', effectiveCoords)
+    weatherLoading.value = false
+    return
+  }
+
   try {
+    const isManual = settings.time.weather.useManualLocation
+    console.log('[Weather Debug] Fetching weather for:', {
+      lat: effectiveCoords.latitude,
+      lon: effectiveCoords.longitude,
+      source: isManual ? 'manual' : 'auto',
+      city: isManual ? settings.time.weather.cityName : 'N/A'
+    })
+
+    const timezone = Intl.DateTimeFormat().resolvedOptions().timeZone
+    
     const res = await fetch(
-      `https://api.open-meteo.com/v1/forecast?latitude=${coords.value.latitude}&longitude=${coords.value.longitude}&current=temperature_2m,weather_code&timezone=auto`
+      `https://api.open-meteo.com/v1/forecast?latitude=${effectiveCoords.latitude}&longitude=${effectiveCoords.longitude}&current=temperature_2m,weather_code&timezone=${encodeURIComponent(timezone)}`
     )
     const data = await res.json()
     if (data.current) {
@@ -77,16 +149,45 @@ async function fetchWeather() {
     }
   } catch (e) {
     console.error('Weather fetch failed', e)
+    if (weatherRetryCount.value < maxRetries) {
+      weatherRetryCount.value++
+      setTimeout(fetchWeather, 10000)
+    }
+  } finally {
+    weatherLoading.value = false
   }
 }
 
+// 监听地理位置变化（仅在非手动模式下）
 watch(() => coords.value, (newCoords) => {
-  if (newCoords.latitude && newCoords.longitude) {
+  if (settings.time.weather.enabled && !settings.time.weather.useManualLocation && newCoords.latitude && newCoords.longitude) {
+    weatherRetryCount.value = 0 // 重置重试计数
     fetchWeather()
   }
-})
+}, { immediate: true })
 
-useIntervalFn(fetchWeather, 30 * 60 * 1000) // Refresh every 30 mins
+// 监听手动位置设置变化
+watch(
+  () => [
+    settings.time.weather.enabled,
+    settings.time.weather.useManualLocation,
+    settings.time.weather.manualLatitude,
+    settings.time.weather.manualLongitude
+  ],
+  () => {
+    weatherRetryCount.value = 0 // 重置重试计数
+    fetchWeather()
+  }
+)
+
+// 定时刷新天气
+useIntervalFn(fetchWeather, 10 * 60 * 1000)
+
+// 组件挂载时立即获取天气
+onMounted(() => {
+  weatherRetryCount.value = 0
+  fetchWeather()
+})
 
 // --- Pomodoro Logic ---
 const isPomodoroMode = ref(false)
@@ -143,10 +244,29 @@ function handleTimerDblClick() {
 const formattedDate = computed(() => {
   void currentLang.value // 作为响应式依赖，确保语言切换时重新计算
   const now = dayjs(dateNow.value)
+  
+  // 使用原生Date对象避免dayjs农历插件的问题
+  const nativeDate = dateNow.value instanceof Date ? dateNow.value : new Date()
+  const year = nativeDate.getFullYear()
+  const month = nativeDate.getMonth() + 1  // JavaScript月份从0开始
+  const day = nativeDate.getDate()
+  
+  // 调试日志
+  console.log('[Clock Debug] Date:', {
+    raw: dateNow.value,
+    nativeDate,
+    year,
+    month,
+    day,
+    formatted: `${year}年${month}月${day}日`
+  })
+  
+  const dateStr = isChinese ? `${year}年${month}月${day}日` : now.format('LL')
+  
   return {
     meridiemZH: customMeridiem(now.hour()),
     weekday: now.format('dddd'),
-    date: now.format('LL'),
+    date: dateStr,
     lunar: now.format('LMLD')
   }
 })

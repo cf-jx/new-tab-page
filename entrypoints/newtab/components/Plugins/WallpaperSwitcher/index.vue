@@ -1,11 +1,21 @@
 <script lang="ts" setup>
-import { ref } from 'vue'
+import { ref, nextTick, onMounted } from 'vue'
+import { promiseTimeout } from '@vueuse/core'
 import { useSettingsStore, BgType, saveSettings } from '@/shared/settings'
+import { useBgSwitchStore } from '@newtab/scripts/store'
 
 const settings = useSettingsStore()
+const bgSwitchStore = useBgSwitchStore()
 
 const showLeftArrow = ref(false)
 const showRightArrow = ref(false)
+
+// 防抖机制：防止快速连续点击
+const isSwitching = ref(false)
+const switchCooldown = 500 // 500ms 冷却时间
+
+// 强制重置状态的超时时间
+const RESET_TIMEOUT = 2000
 
 // Define the cycle order
 const bgTypeOrder = [BgType.Bing, BgType.Local, BgType.Online, BgType.None]
@@ -14,25 +24,71 @@ function getCurrentIndex(): number {
   return bgTypeOrder.indexOf(settings.background.bgType)
 }
 
-function switchToPrevious() {
-  const currentIndex = getCurrentIndex()
-  const newIndex = currentIndex === 0 ? bgTypeOrder.length - 1 : currentIndex - 1
-  const newBgType = bgTypeOrder[newIndex]
-  if (newBgType !== undefined) {
-    settings.background.bgType = newBgType
-    saveSettings(settings)
+// 安全的切换包装函数
+async function safeSwitch(direction: 'prev' | 'next') {
+  // 防抖：如果正在切换中，直接返回
+  if (isSwitching.value || bgSwitchStore.isSwitching) return
+  
+  // 设置超时保护，防止卡死
+  const timeoutId = setTimeout(() => {
+    if (isSwitching.value) {
+      console.warn('Wallpaper switch timed out, forcing reset')
+      isSwitching.value = false
+      bgSwitchStore.end()
+    }
+  }, RESET_TIMEOUT)
+
+  try {
+    isSwitching.value = true
+    bgSwitchStore.start()
+    
+    // 等待一帧，确保UI更新
+    await nextTick()
+    
+    const currentIndex = getCurrentIndex()
+    let newIndex: number
+    
+    if (direction === 'prev') {
+      newIndex = currentIndex === 0 ? bgTypeOrder.length - 1 : currentIndex - 1
+    } else {
+      newIndex = (currentIndex + 1) % bgTypeOrder.length
+    }
+    
+    const newBgType = bgTypeOrder[newIndex]
+    
+    if (newBgType !== undefined) {
+      settings.background.bgType = newBgType
+      await saveSettings(settings)
+    }
+    
+    // 等待背景加载完成
+    await promiseTimeout(300)
+    
+  } catch (e) {
+    console.error('Wallpaper switch failed', e)
+  } finally {
+    clearTimeout(timeoutId)
+    bgSwitchStore.end()
+    // 冷却时间后才允许下次切换
+    setTimeout(() => {
+      isSwitching.value = false
+    }, switchCooldown)
   }
 }
 
-function switchToNext() {
-  const currentIndex = getCurrentIndex()
-  const newIndex = (currentIndex + 1) % bgTypeOrder.length
-  const newBgType = bgTypeOrder[newIndex]
-  if (newBgType !== undefined) {
-    settings.background.bgType = newBgType
-    saveSettings(settings)
-  }
+function switchToPrevious() {
+  safeSwitch('prev')
 }
+
+function switchToNext() {
+  safeSwitch('next')
+}
+
+// 组件挂载时强制重置状态，防止之前的错误导致状态残留
+onMounted(() => {
+  isSwitching.value = false
+  bgSwitchStore.end()
+})
 </script>
 
 <template>
