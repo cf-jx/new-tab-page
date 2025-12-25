@@ -71,6 +71,11 @@
     margin-bottom: 5px;
   }
 
+  &__weather {
+    display: inline-block;
+    min-width: 80px; // 预留占位，防止加载时布局偏移
+  }
+
   &--shadow {
     .clock__time-container {
       text-shadow:

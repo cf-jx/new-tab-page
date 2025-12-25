@@ -1,5 +1,5 @@
 <script lang="ts" setup>
-import { useNow, useTimeoutFn } from '@vueuse/core'
+import { useGeolocation, useIntervalFn, useNow } from '@vueuse/core'
 
 import dayjs from 'dayjs/esm'
 import { useTranslation } from 'i18next-vue'
@@ -7,19 +7,14 @@ import { useTranslation } from 'i18next-vue'
 import { isChinese } from '@/shared/lang'
 import { useSettingsStore } from '@/shared/settings'
 
-import { useGeolocation, useIntervalFn } from '@vueuse/core'
+import { useI18nLang } from '@newtab/composables/useI18nLang'
+import { fetchCurrentWeather, weatherIcons } from '@newtab/scripts/api/weather'
 
-const { t, i18next } = useTranslation('newtab')
+const { t } = useTranslation('newtab')
 const settings = useSettingsStore()
 const time = ref()
 
-const currentLang = ref(i18next.language)
-
-i18next.on('languageChanged', (lng) => {
-  useTimeoutFn(() => {
-    currentLang.value = lng
-  }, 100)
-})
+const currentLang = useI18nLang()
 
 function customMeridiem(hours: number) {
   if (hours < 2) return t('time.lateNight')
@@ -36,7 +31,8 @@ const timeNow = useNow({ interval: 1000 })
 const dateNow = useNow({ interval: 60 * 1000 })
 
 const formattedTime = computed(() => {
-  void currentLang.value // 作为响应式依赖，确保语言切换时重新计算
+  // currentLang 由 useI18nLang 提供，作为响应式依赖
+  void currentLang.value
   const now = dayjs(timeNow.value)
   return {
     hour: now.format('HH'),
@@ -57,16 +53,6 @@ const weather = ref<{ temp: number; code: number } | null>(null)
 const weatherLoading = ref(false)
 const weatherRetryCount = ref(0)
 const maxRetries = 3
-
-const weatherIcons: Record<number, string> = {
-  0: '☀️', 1: '🌤️', 2: '⛅', 3: '☁️',
-  45: '🌫️', 48: '🌫️',
-  51: '🌧️', 53: '🌧️', 55: '🌧️',
-  61: '🌧️', 63: '🌧️', 65: '🌧️',
-  71: '❄️', 73: '❄️', 75: '❄️',
-  80: '🌧️', 81: '🌧️', 82: '🌧️',
-  95: '⛈️', 96: '⛈️', 99: '⛈️'
-}
 
 // 获取有效的经纬度（优先使用手动设置）
 function getEffectiveCoords(): { latitude: number; longitude: number } | null {
@@ -101,9 +87,9 @@ async function fetchWeather() {
     weather.value = null
     return
   }
-  
+
   const effectiveCoords = getEffectiveCoords()
-  
+
   if (!effectiveCoords) {
     // 如果没有地理位置，尝试重试
     if (weatherRetryCount.value < maxRetries) {
@@ -112,43 +98,15 @@ async function fetchWeather() {
     }
     return
   }
-  
+
   weatherLoading.value = true
   weatherRetryCount.value = 0
-  
-  // 检查坐标有效性
-  if (
-    !Number.isFinite(effectiveCoords.latitude) || 
-    !Number.isFinite(effectiveCoords.longitude)
-  ) {
-    console.warn('[Weather Debug] Invalid coordinates:', effectiveCoords)
-    weatherLoading.value = false
-    return
-  }
 
   try {
-    const isManual = settings.time.weather.useManualLocation
-    console.log('[Weather Debug] Fetching weather for:', {
-      lat: effectiveCoords.latitude,
-      lon: effectiveCoords.longitude,
-      source: isManual ? 'manual' : 'auto',
-      city: isManual ? settings.time.weather.cityName : 'N/A'
-    })
-
-    const timezone = Intl.DateTimeFormat().resolvedOptions().timeZone
-    
-    const res = await fetch(
-      `https://api.open-meteo.com/v1/forecast?latitude=${effectiveCoords.latitude}&longitude=${effectiveCoords.longitude}&current=temperature_2m,weather_code&timezone=${encodeURIComponent(timezone)}`
-    )
-    const data = await res.json()
-    if (data.current) {
-      weather.value = {
-        temp: Math.round(data.current.temperature_2m),
-        code: data.current.weather_code
-      }
-    }
+    const result = await fetchCurrentWeather(effectiveCoords)
+    weather.value = result
   } catch (e) {
-    console.error('Weather fetch failed', e)
+    console.error('[Weather] Fetch failed:', e)
     if (weatherRetryCount.value < maxRetries) {
       weatherRetryCount.value++
       setTimeout(fetchWeather, 10000)
@@ -340,8 +298,8 @@ const formattedDate = computed(() => {
 
 <style lang="scss" scoped>
 .clock__pomodoro {
-  cursor: pointer;
   position: relative;
+  cursor: pointer;
   transition: transform 0.2s ease;
   
   &:active {
@@ -350,16 +308,16 @@ const formattedDate = computed(() => {
 }
 
 .pomodoro-hint {
-  font-size: 0.4em;
-  opacity: 0.5;
   margin-left: 10px;
+  font-size: 0.4em;
   vertical-align: middle;
+  opacity: 0.5;
 }
 
 .clock__time-wrapper {
-  cursor: pointer;
   display: inline-flex;
   align-items: baseline;
+  cursor: pointer;
   
   &:hover {
     opacity: 0.9;
