@@ -97,9 +97,9 @@ watchEffect(() => {
 
   &__header {
     display: flex;
+    gap: 6px;
     align-items: center;
     justify-content: center; // 居中对齐
-    gap: 6px;
     padding: 0 4px;
   }
 
@@ -107,7 +107,7 @@ watchEffect(() => {
     width: 18px;
     height: 18px;
     color: #f5b800;
-    filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.2));
+    filter: drop-shadow(0 2px 4px rgb(0 0 0 / 20%));
   }
 
   &__title {
@@ -120,8 +120,8 @@ watchEffect(() => {
   &__list {
     display: flex;
     flex-wrap: wrap;
-    justify-content: center; // 居中对齐
     gap: 8px;
+    justify-content: center; // 居中对齐
     padding: 0 4px;
   }
 }
@@ -134,51 +134,38 @@ watchEffect(() => {
  */
 .site-pill {
   display: inline-flex;
-  align-items: center;
   gap: 8px;
+  align-items: center;
   padding: 6px 14px 6px 8px;
-  border: 1px solid rgba(0, 0, 0, 0.15); // 纤细的半透明灰线勾勒轮廓
-  border-radius: 12px; // R12 圆角矩形
-  background: rgba(255, 255, 255, 0.08); // 几乎全透明，让壁纸纹理透传
-  backdrop-filter: blur(4px); // 轻微模糊，增强层次
-  cursor: pointer;
   font-family: inherit;
-  
-  // 弹性动画曲线 - 模拟物理弹性
-  transition: all 0.35s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+  cursor: pointer;
+  background: rgb(255 255 255 / 8%); // 几乎全透明，让壁纸纹理透传
+  border: 1px solid rgb(0 0 0 / 15%); // 纤细的半透明灰线勾勒轮廓
+  border-radius: 12px; // R12 圆角矩形
+  backdrop-filter: blur(4px); // 轻微模糊，增强层次
   
   // Transform origin bottom - 底部中心缩放，向上生长
   transform-origin: center bottom;
   
-  html.dark & {
-    border-color: rgba(255, 255, 255, 0.2);
-    background: rgba(255, 255, 255, 0.05);
-  }
+  // 弹性动画曲线 - 模拟物理弹性
+  transition: all 0.35s cubic-bezier(0.175, 0.885, 0.32, 1.275);
 
   // 悬停状态 - "实体化变形" (Solid Transformation)
   &:hover {
+    // 层级跃升 - 防止遮挡
+    z-index: 10;
+
     // 瞬间变为不透明的纯白实体
-    background: rgba(255, 255, 255, 0.95);
-    border-color: rgba(0, 0, 0, 0.1);
+    background: rgb(255 255 255 / 95%);
+    border-color: rgb(0 0 0 / 10%);
     
     // 深远的弥散阴影 - 营造悬浮感
     box-shadow: 
-      0 8px 24px rgba(0, 0, 0, 0.12),
-      0 4px 12px rgba(0, 0, 0, 0.08);
+      0 8px 24px rgb(0 0 0 / 12%),
+      0 4px 12px rgb(0 0 0 / 8%);
     
     // 向上位移 + 整体放大1.15倍 - 模拟气球上浮
     transform: translateY(-4px) scale(1.15);
-    
-    // 层级跃升 - 防止遮挡
-    z-index: 10;
-    
-    html.dark & {
-      background: rgba(40, 40, 40, 0.95);
-      border-color: rgba(255, 255, 255, 0.25);
-      box-shadow: 
-        0 8px 24px rgba(0, 0, 0, 0.4),
-        0 4px 12px rgba(0, 0, 0, 0.2);
-    }
   }
 
   // 按下状态 - 阻尼感回弹
@@ -186,44 +173,58 @@ watchEffect(() => {
     transform: translateY(-2px) scale(1.08);
     transition-duration: 0.1s;
   }
+}
 
-  &__icon {
+// Dark mode - placed after state selectors to maintain specificity order
+html.dark .site-pill {
+  background: rgb(255 255 255 / 5%);
+  border-color: rgb(255 255 255 / 20%);
+
+  &:hover {
+    background: rgb(40 40 40 / 95%);
+    border-color: rgb(255 255 255 / 25%);
+    box-shadow: 
+      0 8px 24px rgb(0 0 0 / 40%),
+      0 4px 12px rgb(0 0 0 / 20%);
+  }
+}
+
+.site-pill__icon {
+  display: flex;
+  flex-shrink: 0;
+  align-items: center;
+  justify-content: center;
+  width: 20px;
+  height: 20px;
+  overflow: hidden;
+  border-radius: 6px;
+
+  img {
     width: 20px;
     height: 20px;
-    flex-shrink: 0;
-    border-radius: 6px;
-    overflow: hidden;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-
-    img {
-      width: 20px;
-      height: 20px;
-      object-fit: contain;
-    }
+    object-fit: contain;
   }
+}
 
-  &__placeholder {
-    width: 100%;
-    height: 100%;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    font-size: 12px;
-    font-weight: bold;
-    color: white;
-    text-shadow: 0 1px 2px rgba(0, 0, 0, 0.2);
-  }
+.site-pill__placeholder {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  height: 100%;
+  font-size: 12px;
+  font-weight: bold;
+  color: white;
+  text-shadow: 0 1px 2px rgb(0 0 0 / 20%);
+}
 
-  &__name {
-    font-size: 13px;
-    color: var(--el-text-color-primary);
-    white-space: nowrap;
-    max-width: 120px;
-    overflow: hidden;
-    text-overflow: ellipsis;
-    line-height: 1;
-  }
+.site-pill__name {
+  max-width: 120px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  font-size: 13px;
+  line-height: 1;
+  color: var(--el-text-color-primary);
+  white-space: nowrap;
 }
 </style>

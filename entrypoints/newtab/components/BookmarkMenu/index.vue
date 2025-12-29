@@ -8,7 +8,6 @@ import RefreshIcon from '@vicons/material/es/RefreshRound'
 import Search from '@vicons/material/es/SearchRound'
 import EditIcon from '@vicons/material/es/EditRound'
 import DeleteIcon from '@vicons/material/es/DeleteRound'
-import ArrowDown from '@vicons/material/es/KeyboardArrowDownRound'
 import Document from '@vicons/material/es/DescriptionRound'
 import { useTranslation } from 'i18next-vue'
 import { browser } from 'wxt/browser'
@@ -50,16 +49,6 @@ const currentBookmarks = computed(() =>
   currentItems.value.filter((node) => node.url && !node.children)
 )
 
-// 限制显示的书签：如果未展开且数量大于10，只显示前10个
-const limitedBookmarks = computed(() => {
-  if (isExpanded.value) return currentBookmarks.value
-  return currentBookmarks.value.slice(0, 10)
-})
-
-const hasMoreBookmarks = computed(() => {
-  return !isExpanded.value && currentBookmarks.value.length > 10
-})
-
 const localFolders = ref<ChromeBookmarkNode[]>([])
 const isDragging = ref(false)
 const topSites = ref<VisitRecord[]>([])
@@ -68,40 +57,7 @@ watch(currentFolders, (newVal) => {
   localFolders.value = [...newVal]
 }, { immediate: true })
 
-// 智能网格布局算法：Bento 重点法 + 自适应
-const getGridStyle = (index: number, total: number) => {
-  // 拖拽过程中，强制所有元素为标准大小，防止布局错乱
-  if (isDragging.value) return { gridColumn: 'span 3' }
 
-  // 1-4个：平分一行
-  if (total === 1) return { gridColumn: 'span 12' }
-  if (total === 2) return { gridColumn: 'span 6' }
-  if (total === 3) return { gridColumn: 'span 4' }
-  if (total === 4) return { gridColumn: 'span 3' }
-
-  const remainder = total % 4
-  
-  // 方案 B：Bento 重点法 (余1)
-  // 第一个元素 2x2 (span 6, span 2 rows)
-  if (remainder === 1) {
-    if (index === 0) {
-      return { gridColumn: 'span 6', gridRow: 'span 2' }
-    }
-    return { gridColumn: 'span 3' }
-  }
-
-  // 余2：第一行2个（中等），后面全部4个
-  if (remainder === 2) {
-    return { gridColumn: index < 2 ? 'span 6' : 'span 3' }
-  }
-
-  // 余3：第一行3个（稍宽），后面全部4个
-  if (remainder === 3) {
-    return { gridColumn: index < 3 ? 'span 4' : 'span 3' }
-  }
-  
-  return { gridColumn: 'span 3' }
-}
 
 const onDragStart = () => {
   isDragging.value = true
@@ -140,13 +96,6 @@ const deleteDialogVisible = ref(false)
 const deleteNode = ref<ChromeBookmarkNode | null>(null)
 const panelContainerRef = ref<HTMLElement | null>(null)
 
-// 折叠/展开状态
-const isExpanded = ref(false)
-
-// 监听文件夹变化，重置折叠状态
-watch(currentFolder, () => {
-  isExpanded.value = false
-})
 const folderContextMenu = reactive({
   visible: false,
   x: 0,
@@ -245,7 +194,7 @@ async function ensureDataLoaded() {
 }
 
 function loadTopSites() {
-  topSites.value = visitTracker.getTopSites(8)
+  topSites.value = visitTracker.getTopSites(5) // 限制显示5个
 }
 
 async function refresh() {
@@ -543,8 +492,6 @@ function showDeleteConfirm(node: ChromeBookmarkNode) {
 async function confirmDelete() {
   if (!deleteNode.value) return
 
-  const isFolder = !deleteNode.value.url
-
   try {
     if (deleteNode.value.children && deleteNode.value.children.length > 0) {
       await browser.bookmarks.removeTree(deleteNode.value.id)
@@ -675,7 +622,7 @@ defineExpose({
           />
         </div>
 
-        <div class="bookmark-panel__body" :class="{ 'is-expanded': isExpanded && !isSearching }">
+        <div class="bookmark-panel__body">
           <transition name="fade" mode="out-in">
             <div v-if="loading" class="bookmark-panel__loading">
               <div class="loading-spinner"></div>
@@ -701,7 +648,7 @@ defineExpose({
             <!-- 正常内容 -->
             <div v-else class="bookmark-panel__content">
               <!-- Top Sites Section -->
-              <top-sites
+              <TopSites
                 :sites="topSites"
                 @click="handleTopSiteClick"
                 @hide="handleHideTopSite"
@@ -720,11 +667,10 @@ defineExpose({
                 @end="onDragEnd"
               >
                 <div
-                  v-for="(folder, index) in localFolders"
+                  v-for="folder in localFolders"
                   :key="folder.id"
                   role="button"
                   class="bookmark-panel__folder-card"
-                  :style="getGridStyle(index, localFolders.length)"
                   @click="enterFolder(folder)"
                   @contextmenu="showContextMenu($event, folder)"
                 >
@@ -742,7 +688,7 @@ defineExpose({
               <!-- 书签列表 -->
               <div v-if="currentBookmarks.length" class="bookmark-panel__bookmark-list">
                 <button
-                  v-for="bookmark in limitedBookmarks"
+                  v-for="bookmark in currentBookmarks"
                   :key="bookmark.id"
                   type="button"
                   class="bookmark-panel__bookmark-item"
@@ -764,12 +710,6 @@ defineExpose({
                     <span class="bookmark-panel__bookmark-url">{{ getUrlDomain(bookmark.url || '') }}</span>
                   </div>
                 </button>
-              </div>
-              
-              <!-- 展开更多按钮 -->
-              <div v-if="hasMoreBookmarks" class="bookmark-panel__expand-btn" @click="isExpanded = true">
-                <span>显示更多 ({{ currentBookmarks.length - 10 }})</span>
-                <el-icon><arrow-down /></el-icon>
               </div>
               
               <p v-if="!currentFolders.length && !currentBookmarks.length" class="bookmark-panel__empty">
@@ -866,19 +806,19 @@ defineExpose({
 }
 
 .bookmark-panel {
-
   display: flex;
   flex-direction: column;
   width: min(860px, 100%);
-  max-height: 80vh;
-  padding: 20px 28px 28px;
-  background: rgba(255, 255, 255, 0.85);
-  border: 1px solid rgba(255, 255, 255, 0.2);
+  max-height: min(70vh, 600px); /* 自适应高度，最大限制 */
+  padding: 20px 28px 0; /* 底部由 body 管理 */
+  margin-bottom: 40px;
+  background: rgb(255 255 255 / 85%);
+  border: 1px solid rgb(255 255 255 / 20%);
   border-radius: 20px;
   box-shadow:
-    0 0 0 1px rgba(0, 0, 0, 0.05),
-    0 8px 24px rgba(0, 0, 0, 0.12),
-    0 4px 8px rgba(0, 0, 0, 0.08);
+    0 0 0 1px rgb(0 0 0 / 5%),
+    0 8px 24px rgb(0 0 0 / 12%),
+    0 4px 8px rgb(0 0 0 / 8%);
   -webkit-backdrop-filter: blur(var(--bookmark-glass-blur, 20px)) saturate(180%);
   backdrop-filter: blur(var(--bookmark-glass-blur, 20px)) saturate(180%);
 
@@ -937,17 +877,17 @@ defineExpose({
 }
 
 .bookmark-panel__title {
+  width: 100%;
   margin: 4px 0 0;
   font-size: 22px;
-  width: 100%;
   text-align: center;
 }
 
 .bookmark-panel__actions {
   position: absolute;
   top: 8px;
-  left: 12px;
   right: auto;
+  left: 12px;
   display: flex;
   gap: 6px;
   align-items: center;
@@ -1014,83 +954,52 @@ defineExpose({
 }
 
 .bookmark-panel__body {
+  position: relative;
   flex: 1;
-  min-height: 200px;
+  min-height: 0;
+  padding-bottom: 28px; /* 底部内边距 */
   margin-top: 18px;
-  overflow-y: auto;
-  overflow-x: hidden;
+  overflow: hidden auto;
   
-  /* 默认状态：无遮罩，无高度限制（因为内容少） */
+  /* 底部渐变遮罩 - 提示可滚动 */
+  -webkit-mask-image: linear-gradient(
+    to bottom,
+    black 0%,
+    black calc(100% - 60px),
+    transparent 100%
+  );
+  mask-image: linear-gradient(
+    to bottom,
+    black 0%,
+    black calc(100% - 60px),
+    transparent 100%
+  );
   
-  /* 展开状态：应用高度限制和遮罩 */
-  &.is-expanded {
-    max-height: 55vh;
-    padding-bottom: 20px;
-    
-    /* 底部渐变遮罩 */
-    mask-image: linear-gradient(to bottom, black calc(100% - 40px), transparent 100%);
-    -webkit-mask-image: linear-gradient(to bottom, black calc(100% - 40px), transparent 100%);
-
-    /* 滚动条样式 */
-    &::-webkit-scrollbar {
-      width: 4px;
-    }
-
-    &::-webkit-scrollbar-track {
-      background: transparent;
-    }
-
-    &::-webkit-scrollbar-thumb {
-      background: transparent;
-      border-radius: 4px;
-      transition: background-color 0.3s ease;
-    }
-
-    &:hover::-webkit-scrollbar-thumb {
-      background: rgb(0 0 0 / 20%);
-
-      &:hover {
-        background: rgb(0 0 0 / 40%);
-      }
-    }
-
-    html.dark & {
-      &:hover::-webkit-scrollbar-thumb {
-        background: rgb(255 255 255 / 20%);
-
-        &:hover {
-          background: rgb(255 255 255 / 40%);
-        }
-      }
-    }
+  /* 滚动条默认透明，hover时显示 */
+  &::-webkit-scrollbar {
+    width: 6px;
   }
-}
 
-.bookmark-panel__expand-btn {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: 6px;
-  width: 100%;
-  padding: 12px 0;
-  margin-top: 8px;
-  font-size: 13px;
-  color: var(--el-text-color-secondary);
-  cursor: pointer;
-  border-radius: 8px;
-  transition: all 0.2s ease;
+  &::-webkit-scrollbar-track {
+    background: transparent;
+  }
 
-  &:hover {
-    color: var(--el-color-primary);
-    background: var(--el-color-primary-light-9);
+  &::-webkit-scrollbar-thumb {
+    background: transparent;
+    border-radius: 3px;
+  }
+
+  &:hover::-webkit-scrollbar-thumb {
+    background: rgb(0 0 0 / 12%);
   }
 
   html.dark & {
-    &:hover {
-      background: rgb(255 255 255 / 10%);
+    &:hover::-webkit-scrollbar-thumb {
+      background: rgb(255 255 255 / 12%);
     }
   }
 }
+
 
 .bookmark-context-backdrop {
   position: fixed;
@@ -1104,21 +1013,21 @@ defineExpose({
   min-width: 160px;
   padding: 5px;
   overflow: hidden;
-  background: rgba(255, 255, 255, 0.8);
-  border: 1px solid rgba(255, 255, 255, 0.2);
+  background: rgb(255 255 255 / 80%);
+  border: 1px solid rgb(255 255 255 / 20%);
   border-radius: 12px;
   box-shadow:
-    0 0 0 1px rgba(0, 0, 0, 0.05),
-    0 12px 32px rgba(0, 0, 0, 0.15);
+    0 0 0 1px rgb(0 0 0 / 5%),
+    0 12px 32px rgb(0 0 0 / 15%);
   -webkit-backdrop-filter: blur(20px) saturate(180%);
   backdrop-filter: blur(20px) saturate(180%);
 
   html.dark & {
-    background: rgba(40, 40, 40, 0.8);
-    border-color: rgba(255, 255, 255, 0.1);
+    background: rgb(40 40 40 / 80%);
+    border-color: rgb(255 255 255 / 10%);
     box-shadow:
-      0 0 0 1px rgba(255, 255, 255, 0.05),
-      0 12px 32px rgba(0, 0, 0, 0.3);
+      0 0 0 1px rgb(255 255 255 / 5%),
+      0 12px 32px rgb(0 0 0 / 30%);
   }
 }
 
@@ -1136,8 +1045,8 @@ defineExpose({
   transition: all 0.15s cubic-bezier(0.25, 1, 0.5, 1);
 
   &:hover {
-    background-color: var(--el-color-primary);
     color: white;
+    background-color: var(--el-color-primary);
 
     html.dark & {
       background-color: var(--el-color-primary);
@@ -1210,27 +1119,27 @@ defineExpose({
 
 .bookmark-panel__folder-grid {
   display: grid;
-  grid-template-columns: repeat(12, 1fr); /* 12列网格系统 */
-  grid-auto-flow: row dense; /* 关键：允许自动填补空隙 */
-  gap: 14px;
+  grid-template-columns: repeat(4, 1fr); /* 固定4列 */
+  gap: 12px;
   width: 100%;
+  height: 100%; /* 填满可用空间 */
 }
 
 .bookmark-panel__folder-card {
   display: flex;
   flex-direction: column;
-  gap: 10px;
+  gap: 8px;
   align-items: center;
   justify-content: center;
-  width: 100%; /* 填满网格单元 */
-  min-height: 120px; /* 保证高度一致 */
-  padding: 24px 12px;
+  width: 100%;
+  min-height: 80px; /* 缩小最小高度 */
+  padding: 16px 12px;
   text-align: center;
   cursor: pointer;
-  user-select: none; /* 防止拖拽时选中文字 */
+  user-select: none;
   background: rgb(255 255 255 / 40%);
   border: 1px solid rgb(255 255 255 / 40%);
-  border-radius: 18px;
+  border-radius: 16px;
   transition:
     transform 0.2s ease,
     border 0.2s ease,
@@ -1247,12 +1156,12 @@ defineExpose({
   &[style*="span 12"] {
     flex-direction: row;
     gap: 16px;
-    padding-left: 24px;
     padding-right: 24px;
+    padding-left: 24px;
     
     .bookmark-panel__folder-info {
-      text-align: left;
       flex: 1;
+      text-align: left;
     }
 
     .bookmark-panel__folder-name {
@@ -1263,45 +1172,52 @@ defineExpose({
 
   /* 拖拽时的样式 */
   &.sortable-ghost {
-    opacity: 0.5;
     background: rgb(255 255 255 / 20%);
+    opacity: 0.5;
   }
 
   &.sortable-drag {
+    z-index: 10;
     cursor: grabbing;
     background: rgb(255 255 255 / 90%);
-    transform: scale(1.05);
     box-shadow: 0 12px 32px rgb(0 0 0 / 20%);
-    z-index: 10;
+    transform: scale(1.05);
     
     /* 拖拽时的文字提示 */
     &::after {
-      content: "松开排序";
       position: absolute;
       bottom: -28px;
       left: 50%;
-      transform: translateX(-50%);
-      background: rgba(0, 0, 0, 0.7);
-      color: white;
       padding: 4px 8px;
-      border-radius: 4px;
       font-size: 12px;
+      color: white;
       white-space: nowrap;
       pointer-events: none;
+      content: "松开排序";
+      background: rgb(0 0 0 / 70%);
+      border-radius: 4px;
+      transform: translateX(-50%);
       animation: fadeIn 0.2s ease;
     }
   }
 
   @keyframes fadeIn {
-    from { opacity: 0; transform: translate(-50%, 5px); }
-    to { opacity: 1; transform: translate(-50%, 0); }
+    from {
+      opacity: 0;
+      transform: translate(-50%, 5px);
+    }
+
+    to {
+      opacity: 1;
+      transform: translate(-50%, 0);
+    }
   }
 
   &:hover {
     background: rgb(255 255 255 / 60%);
     border-color: rgb(255 255 255 / 80%);
-    transform: translateY(-2px);
     box-shadow: 0 4px 12px rgb(0 0 0 / 5%);
+    transform: translateY(-2px);
   }
 
   html.dark & {
@@ -1321,34 +1237,34 @@ defineExpose({
 }
 
 .bookmark-panel__folder-icon-wrap {
+  position: relative; /* 为提示文字定位 */
   display: flex;
+  flex-shrink: 0; /* 防止图标被压缩 */
   align-items: center;
   justify-content: center;
   width: 48px;
   height: 48px;
+  font-size: 24px;
+  color: #f5b800;
+  cursor: grab; /* 提示可拖拽 */
   background: rgb(255 255 255 / 50%);
   border-radius: 14px;
-  color: #f5b800;
-  font-size: 24px;
-  flex-shrink: 0; /* 防止图标被压缩 */
-  cursor: grab; /* 提示可拖拽 */
-  position: relative; /* 为提示文字定位 */
 
   /* 长按时的提示 */
   &:active::after {
-    content: "拖拽排序";
     position: absolute;
     top: -32px;
     left: 50%;
-    transform: translateX(-50%);
-    background: rgba(0, 0, 0, 0.7);
-    color: white;
+    z-index: 20;
     padding: 4px 8px;
-    border-radius: 4px;
     font-size: 12px;
+    color: white;
     white-space: nowrap;
     pointer-events: none;
-    z-index: 20;
+    content: "拖拽排序";
+    background: rgb(0 0 0 / 70%);
+    border-radius: 4px;
+    transform: translateX(-50%);
     animation: fadeIn 0.2s ease;
   }
 
@@ -1357,8 +1273,8 @@ defineExpose({
   }
 
   html.dark & {
-    background: rgb(255 255 255 / 10%);
     color: #ffd700;
+    background: rgb(255 255 255 / 10%);
   }
 }
 
@@ -1367,20 +1283,22 @@ defineExpose({
   color: var(--el-color-warning-dark-2);
 }
 
+/* stylelint-disable-next-line no-descending-specificity */
 .bookmark-panel__folder-info {
   display: flex;
   flex-direction: column;
   gap: 4px;
-  overflow: hidden;
   width: 100%;
+  overflow: hidden;
 }
 
+/* stylelint-disable-next-line no-descending-specificity */
 .bookmark-panel__folder-name {
+  overflow: hidden;
+  text-overflow: ellipsis;
   font-size: 13px;
   color: var(--el-text-color-primary);
   white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
   transition: color 0.2s ease;
 }
 
@@ -1388,10 +1306,8 @@ defineExpose({
   display: flex;
   flex-direction: column;
   gap: 1px;
-  margin-top: 12px;
-  max-height: 280px;
-  overflow-y: auto;
   padding-right: 4px;
+  margin-top: 12px;
 
   /* 滚动条样式 */
   &::-webkit-scrollbar {
@@ -1446,22 +1362,22 @@ defineExpose({
 }
 
 .bookmark-panel__bookmark-favicon {
+  flex-shrink: 0;
   width: 16px;
   height: 16px;
-  flex-shrink: 0;
-  border-radius: 4px;
   object-fit: contain;
+  border-radius: 4px;
 }
 
 .bookmark-panel__bookmark-favicon-placeholder {
   display: flex;
+  flex-shrink: 0;
   align-items: center;
   justify-content: center;
   width: 16px;
   height: 16px;
-  flex-shrink: 0;
-  color: var(--el-text-color-secondary);
   font-size: 14px;
+  color: var(--el-text-color-secondary);
 }
 
 .bookmark-panel__bookmark-info {
@@ -1473,20 +1389,20 @@ defineExpose({
 }
 
 .bookmark-panel__bookmark-title {
+  overflow: hidden;
+  text-overflow: ellipsis;
   font-size: 13px;
   font-weight: 500;
   color: var(--el-text-color-primary);
   white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
 }
 
 .bookmark-panel__bookmark-url {
+  overflow: hidden;
+  text-overflow: ellipsis;
   font-size: 11px;
   color: var(--el-text-color-secondary);
   white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
   opacity: 0.8;
 }
 
@@ -1543,14 +1459,19 @@ defineExpose({
 .bookmark-panel-fade-enter-active,
 .bookmark-panel-fade-leave-active {
   transition:
-    opacity 0.2s ease,
-    transform 0.2s ease;
+    opacity 0.25s ease-out,
+    transform 0.25s ease-out;
 }
 
-.bookmark-panel-fade-enter-from,
-.bookmark-panel-fade-leave-to {
+.bookmark-panel-fade-enter-from {
   opacity: 0;
   transform: translateY(-10px);
+}
+
+.bookmark-panel-fade-leave-to {
+  pointer-events: none; /* 防止离开时的点击事件 */
+  opacity: 0;
+  transform: translateY(10px) scale(0.98);
 }
 
 .bookmark-panel-slide-enter-active,

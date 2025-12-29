@@ -210,8 +210,8 @@ async function searchCity() {
 }
 
 .settings__field {
-  flex: 1;
   display: flex;
+  flex: 1;
   flex-direction: column;
   gap: 8px;
 }
@@ -232,15 +232,15 @@ async function searchCity() {
   border-radius: 8px;
   
   &__label {
+    margin-bottom: 4px;
     font-size: 12px;
     color: var(--el-text-color-secondary);
-    margin-bottom: 4px;
   }
   
   &__value {
     display: flex;
-    align-items: baseline;
     gap: 8px;
+    align-items: baseline;
   }
   
   &__city {

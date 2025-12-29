@@ -43,18 +43,18 @@ const slideTransitionName = computed(() =>
 
 const resetRouter = () => router.reset(isMobile.value ? SettingsRoute.MENU : SettingsRoute.THEME)
 
-function customShow() {
-  // 预加载主题设置视图
-  prefetchSettingsView(SettingsRoute.THEME)
-  resetRouter()
+function customShow(route?: SettingsRoute | string) {
+  const targetRoute = (route as SettingsRoute) || (isMobile.value ? SettingsRoute.MENU : SettingsRoute.THEME)
+  prefetchSettingsView(targetRoute)
+  router.reset(targetRoute)
   show()
 }
 
 function customToggle() {
   if (!opened.value) {
-    // 预加载主题设置视图
-    prefetchSettingsView(SettingsRoute.THEME)
-    resetRouter()
+    const targetRoute = isMobile.value ? SettingsRoute.MENU : SettingsRoute.THEME
+    prefetchSettingsView(targetRoute)
+    router.reset(targetRoute)
   }
   toggle()
 }

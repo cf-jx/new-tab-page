@@ -590,9 +590,9 @@ const isVideoBg = computed(
 
 .online-warning__header {
   display: flex;
+  gap: 12px;
   align-items: center;
   justify-content: space-between;
-  gap: 12px;
   width: 100%;
   padding: 16px 22px 14px;
   border-bottom: 1px solid color-mix(in oklch, var(--el-border-color), transparent 40%);
@@ -600,8 +600,8 @@ const isVideoBg = computed(
 
 .online-warning__title {
   display: flex;
-  align-items: center;
   gap: 10px;
+  align-items: center;
   font-size: 16px;
   font-weight: 700;
 }
@@ -626,10 +626,10 @@ const isVideoBg = computed(
   width: 32px;
   height: 32px;
   color: var(--el-text-color-secondary);
+  cursor: pointer;
   background: transparent;
   border: 1px solid color-mix(in oklch, var(--el-border-color), transparent 30%);
   border-radius: 10px;
-  cursor: pointer;
   transition:
     color var(--el-transition-duration-fast) ease,
     border-color var(--el-transition-duration-fast) ease,
@@ -660,8 +660,8 @@ const isVideoBg = computed(
 
 .online-warning__icon {
   display: grid;
-  place-items: center;
   flex-shrink: 0;
+  place-items: center;
   width: 52px;
   height: 52px;
   font-size: 24px;

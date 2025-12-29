@@ -8,11 +8,16 @@ import {
 import { ApiRound, ChevronRightRound, ColorLensOutlined } from '@vicons/material'
 import { useTranslation } from 'i18next-vue'
 
-import Icon from '@/assets/icon.svg?component'
+import { Chrome, Edge, Firefox, Github } from '@vicons/fa'
+import { useDateFormat, useNow } from '@vueuse/core'
+import { browser } from 'wxt/browser'
+
+import { version } from '@/package.json'
 
 import { SettingsRoute } from '../composables/useSettingsRouter'
 
 const { t } = useTranslation('settings')
+const year = useDateFormat(useNow(), 'YYYY')
 
 interface MenuItem {
   key: SettingsRoute
@@ -103,5 +108,83 @@ function handleMenuSelect(key: string) {
         </el-icon>
       </el-menu-item>
     </el-menu>
+
+    <!-- About Section at Bottom -->
+    <div v-if="!isCollapse" class="settings-aside__footer noselect">
+      <div class="footer-info">
+        <span class="footer-info__name">{{ browser.i18n.getMessage('extension_name') }}</span>
+        <span class="footer-info__version">v{{ version }}</span>
+      </div>
+      <div class="footer-copyright">© {{ year }} cf-jx</div>
+      <div class="footer-links">
+        <el-link :underline="false" href="https://github.com/cf-jx/new-tab-page" target="_blank">
+          <el-icon :size="16"><Github /></el-icon>
+        </el-link>
+        <el-link :underline="false" href="https://chromewebstore.google.com/detail/bhbpmpflnpnkjanfgbjjhldccbckjohb" target="_blank">
+          <el-icon :size="16"><Chrome /></el-icon>
+        </el-link>
+        <el-link :underline="false" href="https://microsoftedge.microsoft.com/addons/detail/keikkgfgidagjlicckkangkfgnbdjdnh" target="_blank">
+          <el-icon :size="16"><Edge /></el-icon>
+        </el-link>
+        <el-link :underline="false" href="https://addons.mozilla.org/firefox/addon/lemon-new-tab/" target="_blank">
+          <el-icon :size="16"><Firefox /></el-icon>
+        </el-link>
+      </div>
+    </div>
   </aside>
 </template>
+
+<style lang="scss" scoped>
+.settings-aside {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+
+  .settings-menu {
+    flex: 1;
+    border-right: none;
+  }
+
+  &__footer {
+    padding: 20px;
+    margin-top: auto;
+    border-top: 1px solid var(--el-border-color-lighter);
+
+    .footer-info {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      margin-bottom: 4px;
+
+      &__name {
+        font-size: 13px;
+        font-weight: 600;
+        color: var(--el-text-color-primary);
+      }
+
+      &__version {
+        font-size: 11px;
+        color: var(--el-color-primary);
+      }
+    }
+
+    .footer-copyright {
+      font-size: 11px;
+      color: var(--el-text-color-secondary);
+    }
+
+    .footer-links {
+      display: flex;
+      gap: 12px;
+      margin-top: 12px;
+
+      .el-link {
+        color: var(--el-text-color-secondary);
+        &:hover {
+          color: var(--el-color-primary);
+        }
+      }
+    }
+  }
+}
+</style>

@@ -265,10 +265,10 @@
       font-size: 12px;
       color: var(--el-text-color-secondary);
       opacity: 0;
+      transform: translateX(-5px);
       transition:
         opacity 0.2s ease,
         transform 0.2s ease;
-      transform: translateX(-5px);
     }
 
     &:hover .menu-chevron,
