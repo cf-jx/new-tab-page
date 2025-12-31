@@ -125,7 +125,9 @@ defineExpose({ show: customShow, hide, toggle: customToggle })
         </el-icon>
       </span>
       <span class="base-dialog-close-btn" @click="close">
-        <component :is="CloseRound" />
+        <el-icon color="currentColor" :size="20">
+          <component :is="CloseRound" />
+        </el-icon>
       </span>
     </template>
 
