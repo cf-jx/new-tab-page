@@ -1,316 +1,115 @@
-# 柠檬起始页
-
 <div align="center">
 
-> **说明**
->
-> 本项目 Fork 自 [Redlnn/lemon-new-tab-page](https://github.com/Redlnn/lemon-new-tab-page)。
->
-> 我们在原版简洁美观的设计基础上，进行了大量的重构与功能扩展，致力于打造更极致的浏览体验。
+# 🍋 柠檬起始页 (Lemon Tab Page)
 
-一个开源、简洁、美观且方便使用的浏览器起始页扩展。
+> **极简、纯净、高效的浏览器新标签页扩展**
 
-[![Version](https://img.shields.io/badge/version-2.5.4-blue.svg)](https://github.com/cf-jx/new-tab-page)
-[![License](https://img.shields.io/badge/license-MIT-green.svg)](./LICENSE)
+[![Version](https://img.shields.io/github/v/release/cf-jx/new-tab-page?label=version&color=blue)](https://github.com/cf-jx/new-tab-page/releases)
+[![License](https://img.shields.io/github/license/cf-jx/new-tab-page)](./LICENSE)
+[![PRs Welcome](https://img.shields.io/badge/PRs-welcome-brightgreen.svg)](https://github.com/cf-jx/new-tab-page/pulls)
 
-[功能特性](#功能特性) • [安装使用](#安装使用) • [开发指南](#开发指南) • [技术栈](#技术栈)
+[特性](#-特性) • [预览](#-预览) • [安装](#-安装) • [开发](#-开发) • [致谢](#-致谢)
 
 </div>
 
-## 功能特性
+---
 
-✨ **简洁美观** - 继承了原版的精心设计，并进一步优化了视觉体验，支持玻璃拟态 (Glassmorphism) 效果。
+## 📖 简介
 
-🔍 **快速搜索** - 页面上直接开始搜索，支持多个搜索引擎
+本项目基于 [Redlnn/lemon-new-tab-page](https://github.com/Redlnn/lemon-new-tab-page) 进行深度重构与优化。
 
-- 内置百度、必应、谷歌等主流搜索引擎
-- 支持自定义搜索引擎（可导入/导出）
-- 智能搜索建议
+我们在原版基础上遵循 **"Less is More"** 的设计哲学，剔除了番茄钟、便签等非核心功能，将设置选项深度整合，致力于打造一款**即开即用、零干扰、纯粹**的浏览器起始页。
 
-🖼️ **精美壁纸** - 支持多种壁纸来源
+如果你喜欢**极致简洁**且**高度可定制**的浏览体验，那么这个版本就是为你准备的。
 
-- Bing 每日一图自动更新
-- 支持上传本地图片/视频作为背景
-- 浅色/深色模式独立壁纸设置
+## ✨ 特性
 
-🔖 **书签管理** - 强大的书签管理功能（增强版）
+- 🎨 **极致简约**：移除冗余组件（番茄钟、便签、壁纸切换插件），回归浏览本质。
+- 🔍 **智能搜索**：
+  - 内置 Google、百度、Bing 等主流引擎。
+  - **深度集成**：搜索引擎管理直接整合至设置页，支持自定义添加/删除引擎。
+  - 支持智能搜索建议。
+- 🖼 **精美壁纸**：
+  - 支持 Bing 每日壁纸自动同步。
+  - 支持本地图片/视频上传。
+  - 深色/浅色模式独立壁纸配置。
+- ⚙️ **统一设置**：
+  - "关于"信息、帮助文档等已全部整合至设置侧边栏，告别杂乱的弹窗。
+  - 重新设计的设置按钮交互，一步直达。
+- 🔖 **高效书签**：
+  - 支持瀑布流与树形视图。
+  - 支持拖拽排序与右键快捷管理。
+- ⚡ **性能优化**：
+  - 基于 WXT + Vue 3 构建，启动速度快。
+  - 完全本地运行，无数据追踪。
 
-- **多种视图**：支持瀑布流和树形视图切换，满足不同浏览习惯
-- **拖拽排序**：支持书签和文件夹的自由拖拽排序
-- **便捷操作**：支持书签的增删改查、文件夹层级导航
-- **搜索功能**：快速查找书签
-
-⏰ **个性化时钟**
-
-- 支持 12/24 小时制切换
-- 支持农历显示（中文环境下）
-- 自定义样式（阴影、闪烁冒号等）
-
-🌍 **多语言支持** - 国际化界面
-
-- 简体中文
-- 繁体中文（香港、台湾）
-- English
-
-⚙️ **丰富设置** - 高度可定制化
-
-- 自定义主题色
-- 搜索框位置、样式调整
-- 性能优化选项
-
-💾 **数据安全**
-
-- **云同步**：支持跨设备同步设置（可选）
-- **本地备份**：支持配置、书签、自定义搜索引擎的本地导入与导出
-
-🎨 **其他特性**
-
-- 深色模式支持
-- 响应式设计，适配各种屏幕
-
-## 预览
+## 📸 预览
 
 <div align="center">
-  <img src="preview/1.webp" width="400" alt="预览图1">
-  <img src="preview/2.webp" width="400" alt="预览图2">
-  <img src="preview/3.webp" width="400" alt="预览图3">
+  <img src="preview/1.webp" width="700" alt="预览图1" style="border-radius: 8px; box-shadow: 0 4px 12px rgba(0,0,0,0.1); margin-bottom: 20px;">
+  <br>
+  <img src="preview/2.webp" width="340" alt="预览图2" style="border-radius: 8px; box-shadow: 0 4px 12px rgba(0,0,0,0.1); display: inline-block; margin-right: 10px;">
+  <img src="preview/3.webp" width="340" alt="预览图3" style="border-radius: 8px; box-shadow: 0 4px 12px rgba(0,0,0,0.1); display: inline-block;">
 </div>
 
-## 安装使用
+## 📦 安装
 
-### 从商店安装
+### 手动安装 (推荐)
 
-**Chrome / Edge**
+1.  前往 [Releases](https://github.com/cf-jx/new-tab-page/releases) 页面下载最新的 `.zip` 压缩包。
+2.  解压下载的文件。
 
-- 即将上架 Chrome Web Store
+#### Chrome / Edge
 
-**Firefox**
+1.  在地址栏输入 `chrome://extensions` (Chrome) 或 `edge://extensions` (Edge)。
+2.  开启右上角的 **"开发者模式"**。
+3.  点击左上角的 **"加载已解压的扩展程序"**。
+4.  选择解压后的文件夹即可。
 
-- 即将上架 Firefox Add-ons
+#### Firefox
 
-### 手动安装
+1.  输入 `about:debugging#/runtime/this-firefox`。
+2.  点击 **"临时载入附加组件"**。
+3.  选择解压后的 `manifest.json` 文件。
 
-#### 1. 下载构建包
+## 🛠 开发
 
-从 [Releases](https://github.com/cf-jx/new-tab-page/releases) 页面下载对应浏览器的zip包，或者自行构建。
-
-#### 2. 解压并加载
-
-**Chrome / Edge**
-
-1. 打开浏览器扩展管理页面（`chrome://extensions` 或 `edge://extensions`）
-2. 开启"开发者模式"
-3. 点击"加载已解压的扩展程序"
-4. 选择解压后的文件夹
-
-**Firefox**
-
-1. 打开 `about:debugging#/runtime/this-firefox`
-2. 点击"临时载入附加组件"
-3. 选择解压后的 `manifest.json` 文件
-
-## 开发指南
-
-### 环境要求
+### 环境准备
 
 - Node.js >= 18
 - pnpm >= 8
 
-### 安装依赖
+### 快速开始
 
 ```bash
+# 1. 安装依赖
 pnpm install
+
+# 2. 启动开发服务器 (支持热更新)
+pnpm dev        # Chrome (默认)
+pnpm dev:edge   # Edge
+pnpm dev:firefox # Firefox
 ```
 
-### 开发模式
-
-启动开发服务器，支持热更新：
+### 构建与打包
 
 ```bash
-# Chrome（默认）
-pnpm dev
-
-# Firefox
-pnpm dev:firefox
-
-# Edge
-pnpm dev:edge
-```
-
-开发模式会在 `.output/` 目录生成未打包的扩展，在浏览器中加载该目录即可。
-
-### 构建生产版本
-
-```bash
-# Chrome
+# 构建生产版本
 pnpm build
 
-# Firefox
-pnpm build:firefox
-
-# Edge
-pnpm build:edge
-```
-
-### 打包为zip
-
-```bash
-# Chrome
+# 打包为 zip (生成至 .output 目录)
 pnpm zip
-
-# Firefox
-pnpm zip:firefox
-
-# Edge
-pnpm zip:edge
 ```
 
-### 代码质量检查
+## 🤝 致谢
 
-```bash
-# 类型检查
-pnpm type-check
+感谢以下开源项目带来的灵感与基础：
 
-# 代码检查（包含 ESLint、Oxlint、Stylelint）
-pnpm lint
+- [Redlnn/lemon-new-tab-page](https://github.com/Redlnn/lemon-new-tab-page) (原版项目)
+- [WXT](https://wxt.dev/)
+- [Vue 3](https://vuejs.org/)
+- [Element Plus](https://element-plus.org/)
 
-# 代码格式化
-pnpm format
-```
+## 📄 许可证
 
-### 运行测试
-
-```bash
-npx playwright test
-```
-
-### 项目结构
-
-```
-new-tab-page/
-├── entrypoints/           # 入口点
-│   ├── newtab/           # 新标签页主应用
-│   │   ├── components/   # Vue 组件
-│   │   ├── styles/       # 样式文件
-│   │   └── main.ts       # 应用入口
-│   └── background/       # 后台服务 worker
-├── shared/               # 共享模块
-│   ├── settings/        # 设置管理（包含版本迁移）
-│   ├── i18n.ts          # 国际化
-│   ├── sync/            # 云同步
-│   ├── bookmark/        # 书签管理
-│   └── network/         # 网络请求工具
-├── assets/              # 静态资源
-├── locales/             # 国际化资源文件
-├── public/              # 公共文件
-│   └── _locales/        # 扩展清单国际化
-├── types/               # TypeScript 类型定义
-└── wxt.config.ts        # WXT 配置文件
-```
-
-## 技术栈
-
-### 核心框架
-
-- **[WXT](https://wxt.dev/)** - 现代化的浏览器扩展开发框架
-- **[Vue 3](https://vuejs.org/)** - 渐进式 JavaScript 框架
-- **[TypeScript](https://www.typescriptlang.org/)** - 类型安全的 JavaScript 超集
-
-### 状态管理 & 工具库
-
-- **[Pinia](https://pinia.vuejs.org/)** - Vue 状态管理
-- **[VueUse](https://vueuse.org/)** - Vue 组合式工具集
-- **[localforage](https://localforage.github.io/localForage/)** - 异步存储库
-- **[Fuse.js](https://fusejs.io/)** - 轻量级模糊搜索
-
-### UI 组件库
-
-- **[Element Plus](https://element-plus.org/)** - Vue 3 组件库
-- **[@vicons](https://www.xicons.org/)** - 图标库集合
-- **[Vue Draggable Plus](https://alfred-skyblue.github.io/vue-draggable-plus/)** - 拖拽排序组件
-
-### 国际化
-
-- **[i18next](https://www.i18next.com/)** - 国际化框架
-- **[i18next-vue](https://github.com/i18next/i18next-vue)** - i18next 的 Vue 3 绑定
-
-### 构建工具
-
-- **[Vite](https://vitejs.dev/)** - 下一代前端构建工具（使用 Rolldown 变体）
-- **[unplugin-auto-import](https://github.com/unplugin/unplugin-auto-import)** - 自动导入 API
-- **[unplugin-vue-components](https://github.com/unplugin/unplugin-vue-components)** - 自动导入组件
-
-### 代码质量
-
-- **[ESLint](https://eslint.org/)** - JavaScript 代码检查
-- **[Oxlint](https://oxc.rs/)** - 快速 Rust 实现的代码检查器
-- **[Stylelint](https://stylelint.io/)** - CSS/SCSS 代码检查
-- **[Prettier](https://prettier.io/)** - 代码格式化工具
-
-### 测试
-
-- **[Playwright](https://playwright.dev/)** - 端到端测试框架
-
-### 其他工具
-
-- **[Day.js](https://day.js.org/)** - 轻量级时间处理库
-- **[DOMPurify](https://github.com/cure53/DOMPurify)** - XSS 过滤器
-
-## 设置系统说明
-
-本项目采用版本化设置迁移机制：
-
-- **当前版本**: 在 `shared/settings/current.ts` 中定义
-- **默认配置**: 在 `shared/settings/default.ts` 中维护
-- **类型定义**: 在 `shared/settings/types/v{版本号}.d.ts` 中定义
-- **版本迁移**: 在 `shared/settings/migrate/` 目录下实现各版本间的迁移逻辑
-
-添加新设置时：
-
-1. 更新 `shared/settings/default.ts` 中的默认值
-2. 更新相应的类型定义文件
-3. 如果是破坏性更改，需要增加版本号并编写迁移函数
-
-## 后台同步机制
-
-扩展使用 Service Worker 实现跨设备同步：
-
-- **消息传递**: 通过 `browser.runtime.sendMessage` 进行通信
-- **队列聚合**: 保留最新的 `lastUpdate` 快照，丢弃旧项
-- **双重计时**: 本地定时器 + 浏览器 Alarms API（防止 SW 挂起）
-- **非同步字段**: 本地/在线壁纸会重置为 Bing 默认值（这些资源无法跨设备同步）
-
-## 浏览器兼容性
-
-| 浏览器  | 支持版本 | Manifest 版本 |
-| ------- | -------- | ------------- |
-| Chrome  | >= 88    | V3            |
-| Edge    | >= 88    | V3            |
-| Firefox | >= 109   | V3            |
-
-不同浏览器的权限配置略有差异（见 `wxt.config.ts`）。
-
-## 许可证
-
-本项目采用 [MIT](./LICENSE) 许可证开源。
-
-## 贡献
-
-欢迎提交 Issue 和 Pull Request！
-
-在提交 PR 前，请确保：
-
-- 代码通过 `pnpm lint` 检查
-- 代码通过 `pnpm type-check` 检查
-- 测试通过 `npx playwright test`
-- 遵循项目现有的代码风格
-
-## 致谢
-
-感谢所有为这个项目做出贡献的开发者！
-
----
-
-<div align="center">
-  如果这个项目对你有帮助，请给个 ⭐️ Star 支持一下！
-</div>
+[MIT](./LICENSE) License © 2025 cf-jx
